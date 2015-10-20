@@ -2,10 +2,11 @@
 title: "top_100_heatmap_and_indicative_species_analyze"
 author: "Jingzhe Jiang"
 date: "2015年10月19日"
-output: html_document
-  toc: true
-  toc_depth: 4
-  keep_md: true
+output: 
+  html_document:
+    toc: true
+    toc_depth: 4
+    keep_md: true
 ---
 # top 100 otus
 combine top 100 otus of each oyster samples in cohort 2
@@ -13,35 +14,70 @@ combine top 100 otus of each oyster samples in cohort 2
 ## read data
 ```{r}
 library(dplyr)
-origin_data <- read.csv("D:/bioinfo/UBC_data/otu_summaries/otu_table_os_top960_NormAndRanked.csv", header = TRUE, row.names = 1) # single number giving the column of the table which contains the row names
+origin_data <- read.csv("D:/bioinfo/UBC_data/otu_summaries/otu_table_os_top960_NormAndRanked.csv", header = TRUE, row.names = 1) # single number giving the column of the table which contains the row names. But dpyr never preserve row names, you should use add_rownames() to preserve them!
 str(origin_data)
-row.names(origin_data)
+row.names(origin_data) %>% head
 colnames(origin_data)
-gtbl <- tbl_df(origin_data)
-gtbl
+mydata <- origin_data %>% add_rownames %>% tbl_df
+mydata %>% glimpse
+row.names(mydata) %>% head
+```
+## select top 100 otus ids
+from each samples (os7-os12), than combined and get rid of redundences, than filtrate from my data
+```{r}
+top_7 <- mydata %>% 
+    arrange(desc(os7)) %>% 
+      select(rowname) %>% 
+        head(100)
+top_8 <- mydata %>% 
+    arrange(desc(os8)) %>% 
+      select(rowname) %>% 
+        head(100)
+top_9 <- mydata %>% 
+    arrange(desc(os9)) %>% 
+      select(rowname) %>% 
+        head(100)
+top_10 <- mydata %>% 
+    arrange(desc(os10)) %>% 
+      select(rowname) %>% 
+        head(100)
+top_11 <- mydata %>% 
+    arrange(desc(os11)) %>% 
+      select(rowname) %>% 
+        head(100)
+top_12 <- mydata %>% 
+    arrange(desc(os12)) %>% 
+      select(rowname) %>% 
+        head(100)
+# all = TRUE means full Outer join tables
+top_cohort2 <- merge(top_12,top_11, by = "rowname", all = TRUE)
+top_cohort2 <- merge(top_cohort2,top_10, by = "rowname", all = TRUE)
+top_cohort2 <- merge(top_cohort2,top_9, by = "rowname", all = TRUE)
+top_cohort2 <- merge(top_cohort2,top_8, by = "rowname", all = TRUE)
+top_cohort2 <- merge(top_cohort2,top_7, by = "rowname", all = TRUE)
+top_cohort2_data <- merge(mydata, top_cohort2, by = "rowname", all.y = TRUE)
+top_cohort2_data %>% arrange(desc(os8)) %>% head
 ```
 ## normalized columns
 based on the total reads of each sample
 ```{r}
 # clip total reads from excel, than paste into R
-refs <- read.delim("clipboard", header = TRUE)
+refs <- read.delim("refs.txt", header = TRUE, row.names = 1)
 refs %>% glimpse
+top_normal <- top_cohort2_data[,2:13]*311167/rep(refs[1,1:12],251)
+
+
+```
+## heatmap with ggplot2
+```{r}
+library(ggplot2)
+library(reshape2)
+# the dataframe is converted from wide format to a long format
+top_melt <- top_cohort2_data %>% 
+  select(rowname,os7,os8,os9,os10,os11,os12) %>% 
+    melt
+
 
 ```
 
-clipboard as below:
-
-SeqName	SmpName	TtlReads
-os1	h0618	494604
-os2	h0625	311167
-os3	h0702	493566
-os4	s0618	470232
-os5	s0625	547637
-os6	s0702	490970
-os7	h0730	501020
-os8	h0806	507057
-os9	h0813	478260
-os10	s0806	545820
-os11	s0813	496962
-os12	s0820	554586
 
