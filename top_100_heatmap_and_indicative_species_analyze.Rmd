@@ -1,0 +1,47 @@
+---
+title: "top_100_heatmap_and_indicative_species_analyze"
+author: "Jingzhe Jiang"
+date: "2015年10月19日"
+output: html_document
+  toc: true
+  toc_depth: 4
+  keep_md: true
+---
+# top 100 otus
+combine top 100 otus of each oyster samples in cohort 2
+
+## read data
+```{r}
+library(dplyr)
+origin_data <- read.csv("D:/bioinfo/UBC_data/otu_summaries/otu_table_os_top960_NormAndRanked.csv", header = TRUE, row.names = 1) # single number giving the column of the table which contains the row names
+str(origin_data)
+row.names(origin_data)
+colnames(origin_data)
+gtbl <- tbl_df(origin_data)
+gtbl
+```
+## normalized columns
+based on the total reads of each sample
+```{r}
+# clip total reads from excel, than paste into R
+refs <- read.delim("clipboard", header = TRUE)
+refs %>% glimpse
+
+```
+
+clipboard as below:
+
+SeqName	SmpName	TtlReads
+os1	h0618	494604
+os2	h0625	311167
+os3	h0702	493566
+os4	s0618	470232
+os5	s0625	547637
+os6	s0702	490970
+os7	h0730	501020
+os8	h0806	507057
+os9	h0813	478260
+os10	s0806	545820
+os11	s0813	496962
+os12	s0820	554586
+
