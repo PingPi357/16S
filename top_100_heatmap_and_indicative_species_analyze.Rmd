@@ -62,22 +62,52 @@ top_cohort2_data %>% arrange(desc(os8)) %>% head
 based on the total reads of each sample
 ```{r}
 # clip total reads from excel, than paste into R
-refs <- read.delim("refs.txt", header = TRUE, row.names = 1)
+refs <- read.delim("refs.txt", header = TRUE)
 refs %>% glimpse
-top_normal <- top_cohort2_data[,2:13]*311167/rep(refs[1,1:12],251)
-
-
+## top_normal <- top_cohort2_data[,2:13]*311167/as.numeric(refs[1,2:13])
+## 两个dataframe相除必须维度一致，或者将分母转变为vector才可以相除。但above is not correct, but I don't know why!
+top_normal <- top_cohort2_data[,2:13]*311167/refs[rep(1,251),2:13]
+#两个dataframe相除必须维度一致，因此用rep(1,251)复制了refs中的ttlReads数据，使其变成dataframe。参见如下：
+refs[rep(1,5),1:13]
+rownames(top_normal) <- top_cohort2_data$rowname
+top_normal %>% str
+top_cohort2_data %>% str
+identical(row.names(top_normal),top_cohort2_data$rowname)
+identical(top_normal$os2,top_cohort2_data$os2) # one is num, one is int
+identical(as.integer(top_normal$os2),top_cohort2_data$os2)
 ```
 ## heatmap with ggplot2
 ```{r}
 library(ggplot2)
 library(reshape2)
 # the dataframe is converted from wide format to a long format
-top_melt <- top_cohort2_data %>% 
-  select(rowname,os7,os8,os9,os10,os11,os12) %>% 
-    melt
+top_melt <- top_normal %>% 
+  add_rownames %>% 
+    select(rowname,os7,os8,os9,os10,os11,os12) %>% 
+      melt
+(p <- ggplot(top_melt, aes(variable, rowname)) + geom_tile(aes(fill = log10(value)), colour = "white") + scale_fill_gradient2(low = "blue", mid = "white", high = "red", midpoint = 2) + theme(axis.text.y = element_text(size = 1), axis.text.x = element_text(size = 4)) + coord_fixed(ratio=0.15))
+```
+## cluster otus on heatmap
+```{r}
+euc_dist <- top_normal %>% dist(method = "euclidean") 
+otuclust <- hclust(euc_dist, method = "average")
+# euc_dist %>% head
+# typeof(euc_dist)
+# mode(euc_dist)s
+# class(euc_dist)
+# otuclust %>% str
+# otuclust %>% class
+# otuclust %>% mode
+# otuclust %>% as.dendrogram
+# otuclust %>% plot
 
+table <- top_normal %>% add_rownames
+table$rowname <- with(otuclust, reorder(labels, desc(order)))
 
+top_melt <- table %>% 
+    select(rowname,os7,os8,os9,os10,os11,os12) %>% 
+      melt
+(p <- ggplot(top_melt, aes(variable, rowname)) + geom_tile(aes(fill = log10(value)), colour = "white") + scale_fill_gradient2(low = "blue", mid = "white", high = "red", midpoint = 2) + theme(axis.text.y = element_text(size = 1), axis.text.x = element_text(size = 4)) + coord_fixed(ratio=0.15))
 ```
 
 
