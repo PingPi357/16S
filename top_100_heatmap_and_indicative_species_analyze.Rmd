@@ -91,6 +91,10 @@ top_melt <- top_normal %>%
 ```{r}
 euc_dist <- top_normal %>% dist(method = "euclidean") 
 otuclust <- hclust(euc_dist, method = "average")
+den_order <- otuclust %>% 
+  as.dendrogram %>%
+    order.dendrogram
+den_order %>% str
 # euc_dist %>% head
 # typeof(euc_dist)
 # mode(euc_dist)s
@@ -98,7 +102,7 @@ otuclust <- hclust(euc_dist, method = "average")
 # otuclust %>% str
 # otuclust %>% class
 # otuclust %>% mode
-# otuclust %>% as.dendrogram
+# otuclust %>% as.dendrogram %>% str 
 # otuclust %>% plot
 
 table <- top_normal %>% add_rownames
