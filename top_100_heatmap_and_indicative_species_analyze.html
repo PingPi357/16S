@@ -70,7 +70,9 @@ img {
 <ul>
 <li><a href="#top-100-otus">top 100 otus</a><ul>
 <li><a href="#read-data">read data</a></li>
+<li><a href="#select-top-100-otus-ids">select top 100 otus ids</a></li>
 <li><a href="#normalized-columns">normalized columns</a></li>
+<li><a href="#heatmap-with-ggplot2">heatmap with ggplot2</a></li>
 </ul></li>
 </ul>
 </div>
@@ -91,7 +93,7 @@ img {
 ## The following objects are masked from 'package:base':
 ## 
 ##     intersect, setdiff, setequal, union</code></pre>
-<pre class="r"><code>origin_data &lt;- read.csv(&quot;D:/bioinfo/UBC_data/otu_summaries/otu_table_os_top960_NormAndRanked.csv&quot;, header = TRUE, row.names = 1) # single number giving the column of the table which contains the row names
+<pre class="r"><code>origin_data &lt;- read.csv(&quot;D:/bioinfo/UBC_data/otu_summaries/otu_table_os_top960_NormAndRanked.csv&quot;, header = TRUE, row.names = 1) # single number giving the column of the table which contains the row names. But dpyr never preserve row names, you should use add_rownames() to preserve them!
 str(origin_data)</code></pre>
 <pre><code>## 'data.frame':    960 obs. of  12 variables:
 ##  $ os1 : int  65781 6220 3572 1863 239 632 2239 2038 3537 9216 ...
@@ -106,282 +108,208 @@ str(origin_data)</code></pre>
 ##  $ os10: int  112139 13210 770 155 10638 1705 5373 34 101 245 ...
 ##  $ os11: int  36434 3173 14906 1187 4509 9532 6013 2188 1448 9157 ...
 ##  $ os12: int  64483 7371 7489 2369 4602 2998 1427 3894 2628 352 ...</code></pre>
-<pre class="r"><code>row.names(origin_data)</code></pre>
-<pre><code>##   [1] &quot;denovo662732&quot;  &quot;denovo1425070&quot; &quot;denovo814559&quot;  &quot;denovo1760022&quot;
-##   [5] &quot;denovo1559849&quot; &quot;denovo1327185&quot; &quot;denovo768018&quot;  &quot;denovo1035276&quot;
-##   [9] &quot;denovo1477023&quot; &quot;denovo1543122&quot; &quot;denovo915108&quot;  &quot;denovo860670&quot; 
-##  [13] &quot;denovo1156384&quot; &quot;denovo1142809&quot; &quot;denovo170534&quot;  &quot;denovo693023&quot; 
-##  [17] &quot;denovo1093725&quot; &quot;denovo856104&quot;  &quot;denovo561174&quot;  &quot;denovo1683946&quot;
-##  [21] &quot;denovo1455744&quot; &quot;denovo557286&quot;  &quot;denovo434128&quot;  &quot;denovo638866&quot; 
-##  [25] &quot;denovo317806&quot;  &quot;denovo662736&quot;  &quot;denovo1579715&quot; &quot;denovo433458&quot; 
-##  [29] &quot;denovo1136525&quot; &quot;denovo808406&quot;  &quot;denovo620303&quot;  &quot;denovo912297&quot; 
-##  [33] &quot;denovo52350&quot;   &quot;denovo1218837&quot; &quot;denovo1103057&quot; &quot;denovo1194195&quot;
-##  [37] &quot;denovo1625815&quot; &quot;denovo955760&quot;  &quot;denovo462999&quot;  &quot;denovo654592&quot; 
-##  [41] &quot;denovo538192&quot;  &quot;denovo65672&quot;   &quot;denovo920937&quot;  &quot;denovo1584768&quot;
-##  [45] &quot;denovo118506&quot;  &quot;denovo786048&quot;  &quot;denovo1395961&quot; &quot;denovo279525&quot; 
-##  [49] &quot;denovo1324431&quot; &quot;denovo203775&quot;  &quot;denovo1720098&quot; &quot;denovo399954&quot; 
-##  [53] &quot;denovo984724&quot;  &quot;denovo1284655&quot; &quot;denovo158042&quot;  &quot;denovo1022006&quot;
-##  [57] &quot;denovo130148&quot;  &quot;denovo1251103&quot; &quot;denovo655412&quot;  &quot;denovo1377533&quot;
-##  [61] &quot;denovo1145770&quot; &quot;denovo1533659&quot; &quot;denovo1686283&quot; &quot;denovo1121171&quot;
-##  [65] &quot;denovo1639036&quot; &quot;denovo1017076&quot; &quot;denovo1725396&quot; &quot;denovo1220249&quot;
-##  [69] &quot;denovo1162359&quot; &quot;denovo172066&quot;  &quot;denovo1682125&quot; &quot;denovo1187056&quot;
-##  [73] &quot;denovo198633&quot;  &quot;denovo1663026&quot; &quot;denovo1210067&quot; &quot;denovo543764&quot; 
-##  [77] &quot;denovo1521762&quot; &quot;denovo1433382&quot; &quot;denovo189293&quot;  &quot;denovo432539&quot; 
-##  [81] &quot;denovo391969&quot;  &quot;denovo233345&quot;  &quot;denovo1730710&quot; &quot;denovo1502042&quot;
-##  [85] &quot;denovo1031142&quot; &quot;denovo1037767&quot; &quot;denovo775637&quot;  &quot;denovo345302&quot; 
-##  [89] &quot;denovo1500588&quot; &quot;denovo1293995&quot; &quot;denovo299535&quot;  &quot;denovo581502&quot; 
-##  [93] &quot;denovo266662&quot;  &quot;denovo51527&quot;   &quot;denovo203661&quot;  &quot;denovo1583249&quot;
-##  [97] &quot;denovo489250&quot;  &quot;denovo965254&quot;  &quot;denovo912979&quot;  &quot;denovo956839&quot; 
-## [101] &quot;denovo921956&quot;  &quot;denovo1460484&quot; &quot;denovo1596085&quot; &quot;denovo638829&quot; 
-## [105] &quot;denovo1335926&quot; &quot;denovo92200&quot;   &quot;denovo1439298&quot; &quot;denovo1136955&quot;
-## [109] &quot;denovo362320&quot;  &quot;denovo821128&quot;  &quot;denovo340592&quot;  &quot;denovo132060&quot; 
-## [113] &quot;denovo1676026&quot; &quot;denovo1552894&quot; &quot;denovo367396&quot;  &quot;denovo705407&quot; 
-## [117] &quot;denovo613215&quot;  &quot;denovo980138&quot;  &quot;denovo596415&quot;  &quot;denovo431938&quot; 
-## [121] &quot;denovo1155118&quot; &quot;denovo1051221&quot; &quot;denovo495293&quot;  &quot;denovo1327678&quot;
-## [125] &quot;denovo275492&quot;  &quot;denovo3743&quot;    &quot;denovo57741&quot;   &quot;denovo640768&quot; 
-## [129] &quot;denovo357473&quot;  &quot;denovo1367007&quot; &quot;denovo953277&quot;  &quot;denovo583661&quot; 
-## [133] &quot;denovo1050490&quot; &quot;denovo287142&quot;  &quot;denovo1552954&quot; &quot;denovo1258897&quot;
-## [137] &quot;denovo313457&quot;  &quot;denovo112009&quot;  &quot;denovo972185&quot;  &quot;denovo987767&quot; 
-## [141] &quot;denovo789478&quot;  &quot;denovo1148983&quot; &quot;denovo578894&quot;  &quot;denovo1559283&quot;
-## [145] &quot;denovo1460014&quot; &quot;denovo1074506&quot; &quot;denovo37306&quot;   &quot;denovo871329&quot; 
-## [149] &quot;denovo107193&quot;  &quot;denovo731156&quot;  &quot;denovo700434&quot;  &quot;denovo54572&quot;  
-## [153] &quot;denovo1059460&quot; &quot;denovo1233649&quot; &quot;denovo1500688&quot; &quot;denovo1731240&quot;
-## [157] &quot;denovo1754679&quot; &quot;denovo1092785&quot; &quot;denovo8306&quot;    &quot;denovo1347779&quot;
-## [161] &quot;denovo1071845&quot; &quot;denovo1079196&quot; &quot;denovo547070&quot;  &quot;denovo1290952&quot;
-## [165] &quot;denovo1529768&quot; &quot;denovo976096&quot;  &quot;denovo710744&quot;  &quot;denovo1461141&quot;
-## [169] &quot;denovo1139397&quot; &quot;denovo1302275&quot; &quot;denovo1535638&quot; &quot;denovo1774296&quot;
-## [173] &quot;denovo1461144&quot; &quot;denovo961112&quot;  &quot;denovo1252064&quot; &quot;denovo112921&quot; 
-## [177] &quot;denovo1096821&quot; &quot;denovo617238&quot;  &quot;denovo179042&quot;  &quot;denovo995949&quot; 
-## [181] &quot;denovo223078&quot;  &quot;denovo713681&quot;  &quot;denovo586582&quot;  &quot;denovo859771&quot; 
-## [185] &quot;denovo1585536&quot; &quot;denovo577174&quot;  &quot;denovo1743922&quot; &quot;denovo1220278&quot;
-## [189] &quot;denovo1232694&quot; &quot;denovo313835&quot;  &quot;denovo939613&quot;  &quot;denovo628944&quot; 
-## [193] &quot;denovo519765&quot;  &quot;denovo1732409&quot; &quot;denovo890427&quot;  &quot;denovo208223&quot; 
-## [197] &quot;denovo204305&quot;  &quot;denovo399503&quot;  &quot;denovo1195151&quot; &quot;denovo210630&quot; 
-## [201] &quot;denovo238836&quot;  &quot;denovo1683673&quot; &quot;denovo311908&quot;  &quot;denovo1670264&quot;
-## [205] &quot;denovo1652942&quot; &quot;denovo948950&quot;  &quot;denovo214246&quot;  &quot;denovo752875&quot; 
-## [209] &quot;denovo729359&quot;  &quot;denovo240207&quot;  &quot;denovo19500&quot;   &quot;denovo12834&quot;  
-## [213] &quot;denovo1423212&quot; &quot;denovo30040&quot;   &quot;denovo918504&quot;  &quot;denovo242761&quot; 
-## [217] &quot;denovo413039&quot;  &quot;denovo244825&quot;  &quot;denovo944764&quot;  &quot;denovo339048&quot; 
-## [221] &quot;denovo1054936&quot; &quot;denovo1232973&quot; &quot;denovo83894&quot;   &quot;denovo1703852&quot;
-## [225] &quot;denovo167137&quot;  &quot;denovo460993&quot;  &quot;denovo927915&quot;  &quot;denovo640126&quot; 
-## [229] &quot;denovo1022436&quot; &quot;denovo973136&quot;  &quot;denovo64259&quot;   &quot;denovo108791&quot; 
-## [233] &quot;denovo1333307&quot; &quot;denovo1699786&quot; &quot;denovo232859&quot;  &quot;denovo1405641&quot;
-## [237] &quot;denovo462870&quot;  &quot;denovo381677&quot;  &quot;denovo1065681&quot; &quot;denovo406816&quot; 
-## [241] &quot;denovo570630&quot;  &quot;denovo1765786&quot; &quot;denovo1461216&quot; &quot;denovo622191&quot; 
-## [245] &quot;denovo1505621&quot; &quot;denovo862239&quot;  &quot;denovo1497950&quot; &quot;denovo600105&quot; 
-## [249] &quot;denovo1178554&quot; &quot;denovo606764&quot;  &quot;denovo785776&quot;  &quot;denovo1177908&quot;
-## [253] &quot;denovo303383&quot;  &quot;denovo548548&quot;  &quot;denovo1683444&quot; &quot;denovo911239&quot; 
-## [257] &quot;denovo1768855&quot; &quot;denovo376664&quot;  &quot;denovo1538816&quot; &quot;denovo1087758&quot;
-## [261] &quot;denovo47776&quot;   &quot;denovo823941&quot;  &quot;denovo847190&quot;  &quot;denovo1529151&quot;
-## [265] &quot;denovo1320467&quot; &quot;denovo318553&quot;  &quot;denovo1695008&quot; &quot;denovo1343764&quot;
-## [269] &quot;denovo1349216&quot; &quot;denovo1237631&quot; &quot;denovo998467&quot;  &quot;denovo823489&quot; 
-## [273] &quot;denovo106727&quot;  &quot;denovo1272072&quot; &quot;denovo653391&quot;  &quot;denovo354012&quot; 
-## [277] &quot;denovo1178830&quot; &quot;denovo1507662&quot; &quot;denovo1453849&quot; &quot;denovo942340&quot; 
-## [281] &quot;denovo962257&quot;  &quot;denovo216907&quot;  &quot;denovo1293918&quot; &quot;denovo1153492&quot;
-## [285] &quot;denovo1685089&quot; &quot;denovo215704&quot;  &quot;denovo1528055&quot; &quot;denovo1176276&quot;
-## [289] &quot;denovo115454&quot;  &quot;denovo497520&quot;  &quot;denovo359549&quot;  &quot;denovo1542464&quot;
-## [293] &quot;denovo99211&quot;   &quot;denovo1716540&quot; &quot;denovo643908&quot;  &quot;denovo677744&quot; 
-## [297] &quot;denovo72082&quot;   &quot;denovo558840&quot;  &quot;denovo679037&quot;  &quot;denovo632179&quot; 
-## [301] &quot;denovo719291&quot;  &quot;denovo941447&quot;  &quot;denovo1015897&quot; &quot;denovo1467138&quot;
-## [305] &quot;denovo1250134&quot; &quot;denovo397529&quot;  &quot;denovo687790&quot;  &quot;denovo1039858&quot;
-## [309] &quot;denovo729674&quot;  &quot;denovo111172&quot;  &quot;denovo872506&quot;  &quot;denovo1583745&quot;
-## [313] &quot;denovo1033522&quot; &quot;denovo146302&quot;  &quot;denovo466416&quot;  &quot;denovo509244&quot; 
-## [317] &quot;denovo222342&quot;  &quot;denovo1110758&quot; &quot;denovo408510&quot;  &quot;denovo1096322&quot;
-## [321] &quot;denovo1774843&quot; &quot;denovo1286340&quot; &quot;denovo741397&quot;  &quot;denovo218779&quot; 
-## [325] &quot;denovo1678605&quot; &quot;denovo913777&quot;  &quot;denovo644756&quot;  &quot;denovo687380&quot; 
-## [329] &quot;denovo699027&quot;  &quot;denovo530703&quot;  &quot;denovo1645364&quot; &quot;denovo1569122&quot;
-## [333] &quot;denovo1080387&quot; &quot;denovo1475368&quot; &quot;denovo459882&quot;  &quot;denovo745164&quot; 
-## [337] &quot;denovo1492122&quot; &quot;denovo995988&quot;  &quot;denovo101614&quot;  &quot;denovo1512634&quot;
-## [341] &quot;denovo890215&quot;  &quot;denovo996083&quot;  &quot;denovo739082&quot;  &quot;denovo1576950&quot;
-## [345] &quot;denovo145444&quot;  &quot;denovo382952&quot;  &quot;denovo779594&quot;  &quot;denovo1612226&quot;
-## [349] &quot;denovo1284749&quot; &quot;denovo705886&quot;  &quot;denovo1181752&quot; &quot;denovo1475075&quot;
-## [353] &quot;denovo1054295&quot; &quot;denovo1067515&quot; &quot;denovo638268&quot;  &quot;denovo844470&quot; 
-## [357] &quot;denovo738152&quot;  &quot;denovo306685&quot;  &quot;denovo6317&quot;    &quot;denovo8451&quot;   
-## [361] &quot;denovo1295886&quot; &quot;denovo69297&quot;   &quot;denovo1696629&quot; &quot;denovo1717952&quot;
-## [365] &quot;denovo347057&quot;  &quot;denovo976547&quot;  &quot;denovo271827&quot;  &quot;denovo1175688&quot;
-## [369] &quot;denovo933360&quot;  &quot;denovo733843&quot;  &quot;denovo1136265&quot; &quot;denovo1165463&quot;
-## [373] &quot;denovo138381&quot;  &quot;denovo196566&quot;  &quot;denovo397425&quot;  &quot;denovo1313586&quot;
-## [377] &quot;denovo451179&quot;  &quot;denovo1175979&quot; &quot;denovo1056352&quot; &quot;denovo265127&quot; 
-## [381] &quot;denovo408643&quot;  &quot;denovo188365&quot;  &quot;denovo809663&quot;  &quot;denovo1163184&quot;
-## [385] &quot;denovo332144&quot;  &quot;denovo247315&quot;  &quot;denovo575062&quot;  &quot;denovo144556&quot; 
-## [389] &quot;denovo477685&quot;  &quot;denovo165695&quot;  &quot;denovo785264&quot;  &quot;denovo1262347&quot;
-## [393] &quot;denovo685205&quot;  &quot;denovo1552925&quot; &quot;denovo707290&quot;  &quot;denovo1298770&quot;
-## [397] &quot;denovo1018459&quot; &quot;denovo138059&quot;  &quot;denovo253976&quot;  &quot;denovo1313102&quot;
-## [401] &quot;denovo891026&quot;  &quot;denovo137490&quot;  &quot;denovo1371028&quot; &quot;denovo774726&quot; 
-## [405] &quot;denovo375754&quot;  &quot;denovo460667&quot;  &quot;denovo1058719&quot; &quot;denovo45065&quot;  
-## [409] &quot;denovo1613402&quot; &quot;denovo1086824&quot; &quot;denovo1313859&quot; &quot;denovo1746456&quot;
-## [413] &quot;denovo89864&quot;   &quot;denovo229728&quot;  &quot;denovo97117&quot;   &quot;denovo1174421&quot;
-## [417] &quot;denovo986055&quot;  &quot;denovo217215&quot;  &quot;denovo482943&quot;  &quot;denovo835034&quot; 
-## [421] &quot;denovo1615999&quot; &quot;denovo1150659&quot; &quot;denovo245577&quot;  &quot;denovo152547&quot; 
-## [425] &quot;denovo1523982&quot; &quot;denovo1534924&quot; &quot;denovo405473&quot;  &quot;denovo615882&quot; 
-## [429] &quot;denovo1652040&quot; &quot;denovo584445&quot;  &quot;denovo699555&quot;  &quot;denovo1109803&quot;
-## [433] &quot;denovo446277&quot;  &quot;denovo936348&quot;  &quot;denovo1335061&quot; &quot;denovo1517706&quot;
-## [437] &quot;denovo1411383&quot; &quot;denovo920092&quot;  &quot;denovo1023951&quot; &quot;denovo79715&quot;  
-## [441] &quot;denovo567309&quot;  &quot;denovo1187970&quot; &quot;denovo727204&quot;  &quot;denovo734068&quot; 
-## [445] &quot;denovo512166&quot;  &quot;denovo359249&quot;  &quot;denovo299014&quot;  &quot;denovo346201&quot; 
-## [449] &quot;denovo1766501&quot; &quot;denovo374726&quot;  &quot;denovo1503354&quot; &quot;denovo1412898&quot;
-## [453] &quot;denovo1205230&quot; &quot;denovo830054&quot;  &quot;denovo238601&quot;  &quot;denovo563079&quot; 
-## [457] &quot;denovo179676&quot;  &quot;denovo457114&quot;  &quot;denovo873379&quot;  &quot;denovo693009&quot; 
-## [461] &quot;denovo1021067&quot; &quot;denovo969193&quot;  &quot;denovo596265&quot;  &quot;denovo1209920&quot;
-## [465] &quot;denovo234357&quot;  &quot;denovo1097540&quot; &quot;denovo1136432&quot; &quot;denovo1116310&quot;
-## [469] &quot;denovo1698512&quot; &quot;denovo892158&quot;  &quot;denovo1104325&quot; &quot;denovo218871&quot; 
-## [473] &quot;denovo615410&quot;  &quot;denovo234644&quot;  &quot;denovo664517&quot;  &quot;denovo673139&quot; 
-## [477] &quot;denovo573201&quot;  &quot;denovo758150&quot;  &quot;denovo450350&quot;  &quot;denovo531235&quot; 
-## [481] &quot;denovo1561556&quot; &quot;denovo106416&quot;  &quot;denovo823403&quot;  &quot;denovo1686600&quot;
-## [485] &quot;denovo1043235&quot; &quot;denovo679041&quot;  &quot;denovo1752632&quot; &quot;denovo972717&quot; 
-## [489] &quot;denovo935772&quot;  &quot;denovo174506&quot;  &quot;denovo1176308&quot; &quot;denovo436604&quot; 
-## [493] &quot;denovo923953&quot;  &quot;denovo1705190&quot; &quot;denovo1139261&quot; &quot;denovo405907&quot; 
-## [497] &quot;denovo917147&quot;  &quot;denovo216673&quot;  &quot;denovo56629&quot;   &quot;denovo1490008&quot;
-## [501] &quot;denovo1415833&quot; &quot;denovo822087&quot;  &quot;denovo1503755&quot; &quot;denovo573723&quot; 
-## [505] &quot;denovo1771794&quot; &quot;denovo1347389&quot; &quot;denovo478577&quot;  &quot;denovo1105298&quot;
-## [509] &quot;denovo1596201&quot; &quot;denovo1728999&quot; &quot;denovo261480&quot;  &quot;denovo713248&quot; 
-## [513] &quot;denovo841352&quot;  &quot;denovo108286&quot;  &quot;denovo943678&quot;  &quot;denovo474854&quot; 
-## [517] &quot;denovo1751598&quot; &quot;denovo1267424&quot; &quot;denovo254412&quot;  &quot;denovo865960&quot; 
-## [521] &quot;denovo1288696&quot; &quot;denovo82772&quot;   &quot;denovo619116&quot;  &quot;denovo654221&quot; 
-## [525] &quot;denovo910204&quot;  &quot;denovo1423671&quot; &quot;denovo138014&quot;  &quot;denovo97271&quot;  
-## [529] &quot;denovo675769&quot;  &quot;denovo481967&quot;  &quot;denovo1163950&quot; &quot;denovo1528590&quot;
-## [533] &quot;denovo648570&quot;  &quot;denovo903920&quot;  &quot;denovo1771&quot;    &quot;denovo1743137&quot;
-## [537] &quot;denovo105247&quot;  &quot;denovo56387&quot;   &quot;denovo527272&quot;  &quot;denovo109433&quot; 
-## [541] &quot;denovo1243482&quot; &quot;denovo959665&quot;  &quot;denovo10251&quot;   &quot;denovo1072049&quot;
-## [545] &quot;denovo729303&quot;  &quot;denovo1317798&quot; &quot;denovo1166873&quot; &quot;denovo1280072&quot;
-## [549] &quot;denovo1271874&quot; &quot;denovo825766&quot;  &quot;denovo420540&quot;  &quot;denovo327345&quot; 
-## [553] &quot;denovo796529&quot;  &quot;denovo481865&quot;  &quot;denovo67547&quot;   &quot;denovo314604&quot; 
-## [557] &quot;denovo1738705&quot; &quot;denovo167976&quot;  &quot;denovo1729652&quot; &quot;denovo431287&quot; 
-## [561] &quot;denovo1276143&quot; &quot;denovo1035554&quot; &quot;denovo239149&quot;  &quot;denovo1650918&quot;
-## [565] &quot;denovo1315276&quot; &quot;denovo1226541&quot; &quot;denovo1740963&quot; &quot;denovo1398738&quot;
-## [569] &quot;denovo540550&quot;  &quot;denovo1335313&quot; &quot;denovo715755&quot;  &quot;denovo1368433&quot;
-## [573] &quot;denovo967862&quot;  &quot;denovo1578213&quot; &quot;denovo538587&quot;  &quot;denovo450396&quot; 
-## [577] &quot;denovo1770579&quot; &quot;denovo641807&quot;  &quot;denovo687378&quot;  &quot;denovo1636353&quot;
-## [581] &quot;denovo328770&quot;  &quot;denovo494178&quot;  &quot;denovo16671&quot;   &quot;denovo1161608&quot;
-## [585] &quot;denovo1017121&quot; &quot;denovo1318688&quot; &quot;denovo411887&quot;  &quot;denovo78338&quot;  
-## [589] &quot;denovo1009229&quot; &quot;denovo1431269&quot; &quot;denovo1335774&quot; &quot;denovo260258&quot; 
-## [593] &quot;denovo639769&quot;  &quot;denovo1150016&quot; &quot;denovo1168620&quot; &quot;denovo176047&quot; 
-## [597] &quot;denovo765982&quot;  &quot;denovo218736&quot;  &quot;denovo1456562&quot; &quot;denovo314706&quot; 
-## [601] &quot;denovo247345&quot;  &quot;denovo1545916&quot; &quot;denovo53072&quot;   &quot;denovo1749264&quot;
-## [605] &quot;denovo1125940&quot; &quot;denovo41211&quot;   &quot;denovo1611098&quot; &quot;denovo676750&quot; 
-## [609] &quot;denovo634545&quot;  &quot;denovo487203&quot;  &quot;denovo263359&quot;  &quot;denovo146677&quot; 
-## [613] &quot;denovo1341013&quot; &quot;denovo1092487&quot; &quot;denovo654595&quot;  &quot;denovo342552&quot; 
-## [617] &quot;denovo1693865&quot; &quot;denovo386175&quot;  &quot;denovo883892&quot;  &quot;denovo1124197&quot;
-## [621] &quot;denovo1685813&quot; &quot;denovo390151&quot;  &quot;denovo1184876&quot; &quot;denovo1038783&quot;
-## [625] &quot;denovo1432559&quot; &quot;denovo1314698&quot; &quot;denovo27866&quot;   &quot;denovo1123220&quot;
-## [629] &quot;denovo820521&quot;  &quot;denovo1542305&quot; &quot;denovo927705&quot;  &quot;denovo1313525&quot;
-## [633] &quot;denovo1449522&quot; &quot;denovo123619&quot;  &quot;denovo302768&quot;  &quot;denovo483793&quot; 
-## [637] &quot;denovo1610657&quot; &quot;denovo705580&quot;  &quot;denovo1253982&quot; &quot;denovo429101&quot; 
-## [641] &quot;denovo552478&quot;  &quot;denovo1107328&quot; &quot;denovo193923&quot;  &quot;denovo376347&quot; 
-## [645] &quot;denovo50186&quot;   &quot;denovo306787&quot;  &quot;denovo1005478&quot; &quot;denovo1020187&quot;
-## [649] &quot;denovo15018&quot;   &quot;denovo39714&quot;   &quot;denovo1745263&quot; &quot;denovo227591&quot; 
-## [653] &quot;denovo1624753&quot; &quot;denovo644627&quot;  &quot;denovo1453872&quot; &quot;denovo1773782&quot;
-## [657] &quot;denovo81259&quot;   &quot;denovo1004776&quot; &quot;denovo820680&quot;  &quot;denovo291310&quot; 
-## [661] &quot;denovo1609857&quot; &quot;denovo48690&quot;   &quot;denovo194663&quot;  &quot;denovo1125712&quot;
-## [665] &quot;denovo1042395&quot; &quot;denovo649906&quot;  &quot;denovo787261&quot;  &quot;denovo77358&quot;  
-## [669] &quot;denovo1113012&quot; &quot;denovo572733&quot;  &quot;denovo788648&quot;  &quot;denovo1034960&quot;
-## [673] &quot;denovo1052578&quot; &quot;denovo212898&quot;  &quot;denovo641235&quot;  &quot;denovo1279814&quot;
-## [677] &quot;denovo126615&quot;  &quot;denovo506636&quot;  &quot;denovo1662736&quot; &quot;denovo1190320&quot;
-## [681] &quot;denovo876045&quot;  &quot;denovo634541&quot;  &quot;denovo289706&quot;  &quot;denovo1645785&quot;
-## [685] &quot;denovo1699672&quot; &quot;denovo1445616&quot; &quot;denovo803922&quot;  &quot;denovo965749&quot; 
-## [689] &quot;denovo360530&quot;  &quot;denovo221595&quot;  &quot;denovo542158&quot;  &quot;denovo782845&quot; 
-## [693] &quot;denovo433548&quot;  &quot;denovo1627677&quot; &quot;denovo1501661&quot; &quot;denovo677593&quot; 
-## [697] &quot;denovo800085&quot;  &quot;denovo924512&quot;  &quot;denovo1639701&quot; &quot;denovo674246&quot; 
-## [701] &quot;denovo1201117&quot; &quot;denovo1342525&quot; &quot;denovo116245&quot;  &quot;denovo1344540&quot;
-## [705] &quot;denovo473165&quot;  &quot;denovo230078&quot;  &quot;denovo236264&quot;  &quot;denovo1554041&quot;
-## [709] &quot;denovo452452&quot;  &quot;denovo1394722&quot; &quot;denovo1274267&quot; &quot;denovo921920&quot; 
-## [713] &quot;denovo1132099&quot; &quot;denovo1055844&quot; &quot;denovo893785&quot;  &quot;denovo117036&quot; 
-## [717] &quot;denovo515629&quot;  &quot;denovo555188&quot;  &quot;denovo537882&quot;  &quot;denovo715649&quot; 
-## [721] &quot;denovo440246&quot;  &quot;denovo149499&quot;  &quot;denovo776067&quot;  &quot;denovo833995&quot; 
-## [725] &quot;denovo130763&quot;  &quot;denovo441204&quot;  &quot;denovo671657&quot;  &quot;denovo538939&quot; 
-## [729] &quot;denovo123063&quot;  &quot;denovo1722052&quot; &quot;denovo1244569&quot; &quot;denovo709050&quot; 
-## [733] &quot;denovo908069&quot;  &quot;denovo788219&quot;  &quot;denovo148938&quot;  &quot;denovo266029&quot; 
-## [737] &quot;denovo641162&quot;  &quot;denovo8353&quot;    &quot;denovo166169&quot;  &quot;denovo992379&quot; 
-## [741] &quot;denovo1403026&quot; &quot;denovo1505078&quot; &quot;denovo522499&quot;  &quot;denovo255400&quot; 
-## [745] &quot;denovo1839&quot;    &quot;denovo446373&quot;  &quot;denovo211774&quot;  &quot;denovo187499&quot; 
-## [749] &quot;denovo1699894&quot; &quot;denovo1164326&quot; &quot;denovo1169421&quot; &quot;denovo1303800&quot;
-## [753] &quot;denovo900707&quot;  &quot;denovo1573922&quot; &quot;denovo901751&quot;  &quot;denovo836801&quot; 
-## [757] &quot;denovo1263363&quot; &quot;denovo420584&quot;  &quot;denovo273696&quot;  &quot;denovo1774145&quot;
-## [761] &quot;denovo947304&quot;  &quot;denovo110250&quot;  &quot;denovo941686&quot;  &quot;denovo1512655&quot;
-## [765] &quot;denovo342782&quot;  &quot;denovo1394529&quot; &quot;denovo156167&quot;  &quot;denovo1700013&quot;
-## [769] &quot;denovo593555&quot;  &quot;denovo389888&quot;  &quot;denovo1492031&quot; &quot;denovo1256782&quot;
-## [773] &quot;denovo1046430&quot; &quot;denovo1435953&quot; &quot;denovo1412797&quot; &quot;denovo1497249&quot;
-## [777] &quot;denovo144840&quot;  &quot;denovo1329751&quot; &quot;denovo1569256&quot; &quot;denovo998375&quot; 
-## [781] &quot;denovo610818&quot;  &quot;denovo957233&quot;  &quot;denovo1102125&quot; &quot;denovo1214863&quot;
-## [785] &quot;denovo263817&quot;  &quot;denovo343785&quot;  &quot;denovo1467860&quot; &quot;denovo198683&quot; 
-## [789] &quot;denovo12064&quot;   &quot;denovo546403&quot;  &quot;denovo1405429&quot; &quot;denovo967870&quot; 
-## [793] &quot;denovo823624&quot;  &quot;denovo622692&quot;  &quot;denovo1452027&quot; &quot;denovo424018&quot; 
-## [797] &quot;denovo443738&quot;  &quot;denovo425906&quot;  &quot;denovo118524&quot;  &quot;denovo980632&quot; 
-## [801] &quot;denovo1489074&quot; &quot;denovo827476&quot;  &quot;denovo964183&quot;  &quot;denovo361813&quot; 
-## [805] &quot;denovo1029448&quot; &quot;denovo166077&quot;  &quot;denovo1149285&quot; &quot;denovo628447&quot; 
-## [809] &quot;denovo731739&quot;  &quot;denovo1621002&quot; &quot;denovo1061371&quot; &quot;denovo872374&quot; 
-## [813] &quot;denovo1597310&quot; &quot;denovo1035858&quot; &quot;denovo1610647&quot; &quot;denovo1503795&quot;
-## [817] &quot;denovo212882&quot;  &quot;denovo1129749&quot; &quot;denovo1527235&quot; &quot;denovo107725&quot; 
-## [821] &quot;denovo1642066&quot; &quot;denovo1670578&quot; &quot;denovo1085993&quot; &quot;denovo1300741&quot;
-## [825] &quot;denovo1595544&quot; &quot;denovo162850&quot;  &quot;denovo1045187&quot; &quot;denovo360099&quot; 
-## [829] &quot;denovo473501&quot;  &quot;denovo511471&quot;  &quot;denovo1426472&quot; &quot;denovo333338&quot; 
-## [833] &quot;denovo1314927&quot; &quot;denovo1181818&quot; &quot;denovo78625&quot;   &quot;denovo126656&quot; 
-## [837] &quot;denovo810436&quot;  &quot;denovo67708&quot;   &quot;denovo1436140&quot; &quot;denovo658397&quot; 
-## [841] &quot;denovo783532&quot;  &quot;denovo1141822&quot; &quot;denovo612914&quot;  &quot;denovo1637122&quot;
-## [845] &quot;denovo1639443&quot; &quot;denovo658540&quot;  &quot;denovo1088265&quot; &quot;denovo1022919&quot;
-## [849] &quot;denovo49469&quot;   &quot;denovo879658&quot;  &quot;denovo1481256&quot; &quot;denovo389651&quot; 
-## [853] &quot;denovo1017354&quot; &quot;denovo761386&quot;  &quot;denovo1343535&quot; &quot;denovo1541972&quot;
-## [857] &quot;denovo841594&quot;  &quot;denovo1728702&quot; &quot;denovo1016452&quot; &quot;denovo1758699&quot;
-## [861] &quot;denovo1285128&quot; &quot;denovo1326239&quot; &quot;denovo964876&quot;  &quot;denovo1196857&quot;
-## [865] &quot;denovo618296&quot;  &quot;denovo230815&quot;  &quot;denovo197307&quot;  &quot;denovo1743661&quot;
-## [869] &quot;denovo534830&quot;  &quot;denovo1449451&quot; &quot;denovo544210&quot;  &quot;denovo578138&quot; 
-## [873] &quot;denovo704636&quot;  &quot;denovo1174816&quot; &quot;denovo37686&quot;   &quot;denovo851887&quot; 
-## [877] &quot;denovo852855&quot;  &quot;denovo1226852&quot; &quot;denovo799324&quot;  &quot;denovo1243679&quot;
-## [881] &quot;denovo722999&quot;  &quot;denovo1344311&quot; &quot;denovo1584725&quot; &quot;denovo1248852&quot;
-## [885] &quot;denovo819829&quot;  &quot;denovo455805&quot;  &quot;denovo1402334&quot; &quot;denovo1376127&quot;
-## [889] &quot;denovo795220&quot;  &quot;denovo622150&quot;  &quot;denovo1661952&quot; &quot;denovo349426&quot; 
-## [893] &quot;denovo1749422&quot; &quot;denovo1200917&quot; &quot;denovo1256096&quot; &quot;denovo917537&quot; 
-## [897] &quot;denovo201249&quot;  &quot;denovo1033116&quot; &quot;denovo70915&quot;   &quot;denovo1624810&quot;
-## [901] &quot;denovo656814&quot;  &quot;denovo1202391&quot; &quot;denovo503508&quot;  &quot;denovo1460498&quot;
-## [905] &quot;denovo274616&quot;  &quot;denovo1443040&quot; &quot;denovo596008&quot;  &quot;denovo1696985&quot;
-## [909] &quot;denovo1613140&quot; &quot;denovo1529033&quot; &quot;denovo1070540&quot; &quot;denovo1023971&quot;
-## [913] &quot;denovo24194&quot;   &quot;denovo121064&quot;  &quot;denovo1422247&quot; &quot;denovo702032&quot; 
-## [917] &quot;denovo1331591&quot; &quot;denovo397352&quot;  &quot;denovo1004473&quot; &quot;denovo233019&quot; 
-## [921] &quot;denovo609657&quot;  &quot;denovo351245&quot;  &quot;denovo719603&quot;  &quot;denovo314244&quot; 
-## [925] &quot;denovo1624290&quot; &quot;denovo1699261&quot; &quot;denovo1519708&quot; &quot;denovo664806&quot; 
-## [929] &quot;denovo1227029&quot; &quot;denovo1010966&quot; &quot;denovo1533748&quot; &quot;denovo234158&quot; 
-## [933] &quot;denovo1603338&quot; &quot;denovo1426597&quot; &quot;denovo1312012&quot; &quot;denovo1490071&quot;
-## [937] &quot;denovo1517725&quot; &quot;denovo1212946&quot; &quot;denovo1180700&quot; &quot;denovo449785&quot; 
-## [941] &quot;denovo168495&quot;  &quot;denovo1756865&quot; &quot;denovo523962&quot;  &quot;denovo922097&quot; 
-## [945] &quot;denovo1366123&quot; &quot;denovo1164416&quot; &quot;denovo1200504&quot; &quot;denovo291238&quot; 
-## [949] &quot;denovo194835&quot;  &quot;denovo410821&quot;  &quot;denovo276664&quot;  &quot;denovo267040&quot; 
-## [953] &quot;denovo768092&quot;  &quot;denovo1011969&quot; &quot;denovo709006&quot;  &quot;denovo1651470&quot;
-## [957] &quot;denovo1393676&quot; &quot;denovo947416&quot;  &quot;denovo1117218&quot; &quot;denovo1183566&quot;</code></pre>
+<pre class="r"><code>row.names(origin_data) %&gt;% head</code></pre>
+<pre><code>## [1] &quot;denovo662732&quot;  &quot;denovo1425070&quot; &quot;denovo814559&quot;  &quot;denovo1760022&quot;
+## [5] &quot;denovo1559849&quot; &quot;denovo1327185&quot;</code></pre>
 <pre class="r"><code>colnames(origin_data)</code></pre>
 <pre><code>##  [1] &quot;os1&quot;  &quot;os2&quot;  &quot;os3&quot;  &quot;os4&quot;  &quot;os5&quot;  &quot;os6&quot;  &quot;os7&quot;  &quot;os8&quot;  &quot;os9&quot;  &quot;os10&quot;
 ## [11] &quot;os11&quot; &quot;os12&quot;</code></pre>
-<pre class="r"><code>gtbl &lt;- tbl_df(origin_data)
-gtbl</code></pre>
-<pre><code>## Source: local data frame [960 x 12]
-## 
-##      os1    os2    os3    os4    os5   os6    os7   os8   os9   os10  os11
-##    (int)  (int)  (int)  (int)  (int) (int)  (int) (int) (int)  (int) (int)
-## 1  65781 166746 133838 114072 116996 53608 103203 32723 56342 112139 36434
-## 2   6220  12708   3240   7716  25435 20694   2675  9560  7871  13210  3173
-## 3   3572    762   1622    138   1546  2523   2239 11451  7209    770 14906
-## 4   1863    174    799   1465     80   410     83 19998 17405    155  1187
-## 5    239    456   1095    832    271  1598   4953 15650  1020  10638  4509
-## 6    632    899   2425    321   2153  3401   3386 11040  4394   1705  9532
-## 7   2239   1571   1246   2280   1378  1585   2691  7173  2064   5373  6013
-## 8   2038    962   4931    243   1093  5390   1232  2677  3516     34  2188
-## 9   3537   1218   1098   7172    286  2444   4012  2223  1243    101  1448
-## 10  9216    669    216    110   2709   705    129  2059    65    245  9157
-## ..   ...    ...    ...    ...    ...   ...    ...   ...   ...    ...   ...
-## Variables not shown: os12 (int)</code></pre>
+<pre class="r"><code>mydata &lt;- origin_data %&gt;% add_rownames %&gt;% tbl_df
+mydata %&gt;% glimpse</code></pre>
+<pre><code>## Observations: 960
+## Variables: 13
+## $ rowname (chr) &quot;denovo662732&quot;, &quot;denovo1425070&quot;, &quot;denovo814559&quot;, &quot;deno...
+## $ os1     (int) 65781, 6220, 3572, 1863, 239, 632, 2239, 2038, 3537, 9...
+## $ os2     (int) 166746, 12708, 762, 174, 456, 899, 1571, 962, 1218, 66...
+## $ os3     (int) 133838, 3240, 1622, 799, 1095, 2425, 1246, 4931, 1098,...
+## $ os4     (int) 114072, 7716, 138, 1465, 832, 321, 2280, 243, 7172, 11...
+## $ os5     (int) 116996, 25435, 1546, 80, 271, 2153, 1378, 1093, 286, 2...
+## $ os6     (int) 53608, 20694, 2523, 410, 1598, 3401, 1585, 5390, 2444,...
+## $ os7     (int) 103203, 2675, 2239, 83, 4953, 3386, 2691, 1232, 4012, ...
+## $ os8     (int) 32723, 9560, 11451, 19998, 15650, 11040, 7173, 2677, 2...
+## $ os9     (int) 56342, 7871, 7209, 17405, 1020, 4394, 2064, 3516, 1243...
+## $ os10    (int) 112139, 13210, 770, 155, 10638, 1705, 5373, 34, 101, 2...
+## $ os11    (int) 36434, 3173, 14906, 1187, 4509, 9532, 6013, 2188, 1448...
+## $ os12    (int) 64483, 7371, 7489, 2369, 4602, 2998, 1427, 3894, 2628,...</code></pre>
+<pre class="r"><code>row.names(mydata) %&gt;% head</code></pre>
+<pre><code>## [1] &quot;1&quot; &quot;2&quot; &quot;3&quot; &quot;4&quot; &quot;5&quot; &quot;6&quot;</code></pre>
+</div>
+<div id="select-top-100-otus-ids" class="section level2">
+<h2>select top 100 otus ids</h2>
+<p>from each samples (os7-os12), than combined and get rid of redundences, than filtrate from my data</p>
+<pre class="r"><code>top_7 &lt;- mydata %&gt;% 
+    arrange(desc(os7)) %&gt;% 
+      select(rowname) %&gt;% 
+        head(100)
+top_8 &lt;- mydata %&gt;% 
+    arrange(desc(os8)) %&gt;% 
+      select(rowname) %&gt;% 
+        head(100)
+top_9 &lt;- mydata %&gt;% 
+    arrange(desc(os9)) %&gt;% 
+      select(rowname) %&gt;% 
+        head(100)
+top_10 &lt;- mydata %&gt;% 
+    arrange(desc(os10)) %&gt;% 
+      select(rowname) %&gt;% 
+        head(100)
+top_11 &lt;- mydata %&gt;% 
+    arrange(desc(os11)) %&gt;% 
+      select(rowname) %&gt;% 
+        head(100)
+top_12 &lt;- mydata %&gt;% 
+    arrange(desc(os12)) %&gt;% 
+      select(rowname) %&gt;% 
+        head(100)
+# all = TRUE means full Outer join tables
+top_cohort2 &lt;- merge(top_12,top_11, by = &quot;rowname&quot;, all = TRUE)
+top_cohort2 &lt;- merge(top_cohort2,top_10, by = &quot;rowname&quot;, all = TRUE)
+top_cohort2 &lt;- merge(top_cohort2,top_9, by = &quot;rowname&quot;, all = TRUE)
+top_cohort2 &lt;- merge(top_cohort2,top_8, by = &quot;rowname&quot;, all = TRUE)
+top_cohort2 &lt;- merge(top_cohort2,top_7, by = &quot;rowname&quot;, all = TRUE)
+top_cohort2_data &lt;- merge(mydata, top_cohort2, by = &quot;rowname&quot;, all.y = TRUE)
+top_cohort2_data %&gt;% arrange(desc(os8)) %&gt;% head</code></pre>
+<pre><code>##         rowname   os1    os2    os3    os4    os5   os6    os7   os8   os9
+## 1  denovo662732 65781 166746 133838 114072 116996 53608 103203 32723 56342
+## 2 denovo1760022  1863    174    799   1465     80   410     83 19998 17405
+## 3 denovo1559849   239    456   1095    832    271  1598   4953 15650  1020
+## 4  denovo814559  3572    762   1622    138   1546  2523   2239 11451  7209
+## 5 denovo1327185   632    899   2425    321   2153  3401   3386 11040  4394
+## 6 denovo1425070  6220  12708   3240   7716  25435 20694   2675  9560  7871
+##     os10  os11  os12
+## 1 112139 36434 64483
+## 2    155  1187  2369
+## 3  10638  4509  4602
+## 4    770 14906  7489
+## 5   1705  9532  2998
+## 6  13210  3173  7371</code></pre>
 </div>
 <div id="normalized-columns" class="section level2">
 <h2>normalized columns</h2>
 <p>based on the total reads of each sample</p>
 <pre class="r"><code># clip total reads from excel, than paste into R
-refs &lt;- read.delim(&quot;clipboard&quot;, header = TRUE)</code></pre>
+refs &lt;- read.delim(&quot;refs.txt&quot;, header = TRUE)</code></pre>
 <pre><code>## Warning in read.table(file = file, header = header, sep = sep, quote =
-## quote, : incomplete final line found by readTableHeader on 'clipboard'</code></pre>
+## quote, : incomplete final line found by readTableHeader on 'refs.txt'</code></pre>
 <pre class="r"><code>refs %&gt;% glimpse</code></pre>
-<pre><code>## Observations: 0
-## Variables: 1
-## $ clipboard (lgl)</code></pre>
-<p>clipboard as below:</p>
-<p>SeqName SmpName TtlReads os1 h0618 494604 os2 h0625 311167 os3 h0702 493566 os4 s0618 470232 os5 s0625 547637 os6 s0702 490970 os7 h0730 501020 os8 h0806 507057 os9 h0813 478260 os10 s0806 545820 os11 s0813 496962 os12 s0820 554586</p>
+<pre><code>## Observations: 1
+## Variables: 13
+## $ seqID (fctr) totReads
+## $ os1   (int) 494604
+## $ os2   (int) 311167
+## $ os3   (int) 493566
+## $ os4   (int) 470232
+## $ os5   (int) 547637
+## $ os6   (int) 490970
+## $ os7   (int) 501020
+## $ os8   (int) 507057
+## $ os9   (int) 478260
+## $ os10  (int) 545820
+## $ os11  (int) 496962
+## $ os12  (int) 554586</code></pre>
+<pre class="r"><code>## top_normal &lt;- top_cohort2_data[,2:13]*311167/as.numeric(refs[1,2:13])
+## 两个dataframe相除必须维度一致，或者将分母转变为vector才可以相除。但above is not correct, but I don't know why!
+top_normal &lt;- top_cohort2_data[,2:13]*311167/refs[rep(1,251),2:13]
+#两个dataframe相除必须维度一致，因此用rep(1,251)复制了refs中的ttlReads数据，使其变成dataframe。参见如下：
+refs[rep(1,5),1:13]</code></pre>
+<pre><code>##        seqID    os1    os2    os3    os4    os5    os6    os7    os8
+## 1   totReads 494604 311167 493566 470232 547637 490970 501020 507057
+## 1.1 totReads 494604 311167 493566 470232 547637 490970 501020 507057
+## 1.2 totReads 494604 311167 493566 470232 547637 490970 501020 507057
+## 1.3 totReads 494604 311167 493566 470232 547637 490970 501020 507057
+## 1.4 totReads 494604 311167 493566 470232 547637 490970 501020 507057
+##        os9   os10   os11   os12
+## 1   478260 545820 496962 554586
+## 1.1 478260 545820 496962 554586
+## 1.2 478260 545820 496962 554586
+## 1.3 478260 545820 496962 554586
+## 1.4 478260 545820 496962 554586</code></pre>
+<pre class="r"><code>rownames(top_normal) &lt;- top_cohort2_data$rowname
+top_normal %&gt;% str</code></pre>
+<pre><code>## 'data.frame':    251 obs. of  12 variables:
+##  $ os1 : num  17 294.4 194.4 44.7 0 ...
+##  $ os2 : num  0 524 2051 185 3 ...
+##  $ os3 : num  43.5 88.3 158.9 100.9 93.9 ...
+##  $ os4 : num  0.662 251.458 251.458 898.63 0.662 ...
+##  $ os5 : num  11.9 218.2 1877.3 176.1 13.1 ...
+##  $ os6 : num  1.9 209.78 252.88 6.97 38.03 ...
+##  $ os7 : num  10.6 187.6 261.5 31.1 37.3 ...
+##  $ os8 : num  28.84 200.06 276.15 22.71 5.52 ...
+##  $ os9 : num  135.33 201.69 65.71 709.83 4.55 ...
+##  $ os10: num  2.85 55.87 18.81 174.45 1.71 ...
+##  $ os11: num  227 424 128 929 221 ...
+##  $ os12: num  65.65 1691.09 135.22 3.93 67.89 ...</code></pre>
+<pre class="r"><code>top_cohort2_data %&gt;% str</code></pre>
+<pre><code>## 'data.frame':    251 obs. of  13 variables:
+##  $ rowname: chr  &quot;denovo1015897&quot; &quot;denovo1017076&quot; &quot;denovo1022006&quot; &quot;denovo1031142&quot; ...
+##  $ os1    : int  27 468 309 71 0 2038 388 42 108 47 ...
+##  $ os2    : int  0 524 2051 185 3 962 262 2 28 5 ...
+##  $ os3    : int  69 140 252 160 149 4931 40 8 76 30 ...
+##  $ os4    : int  1 380 380 1358 1 243 418 5 35 156 ...
+##  $ os5    : int  21 384 3304 310 23 1093 588 22 374 86 ...
+##  $ os6    : int  3 331 399 11 60 5390 212 5 470 10 ...
+##  $ os7    : int  17 302 421 50 60 1232 143 135 131 418 ...
+##  $ os8    : int  47 326 450 37 9 2677 555 1388 206 3 ...
+##  $ os9    : int  208 310 101 1091 7 3516 49 87 410 62 ...
+##  $ os10   : int  5 98 33 306 3 34 25 1009 7 8 ...
+##  $ os11   : int  362 677 205 1483 353 2188 80 287 116 68 ...
+##  $ os12   : int  117 3014 241 7 121 3894 40 109 416 142 ...</code></pre>
+<pre class="r"><code>identical(row.names(top_normal),top_cohort2_data$rowname)</code></pre>
+<pre><code>## [1] TRUE</code></pre>
+<pre class="r"><code>identical(top_normal$os2,top_cohort2_data$os2) # one is num, one is int</code></pre>
+<pre><code>## [1] FALSE</code></pre>
+<pre class="r"><code>identical(as.integer(top_normal$os2),top_cohort2_data$os2)</code></pre>
+<pre><code>## [1] TRUE</code></pre>
+</div>
+<div id="heatmap-with-ggplot2" class="section level2">
+<h2>heatmap with ggplot2</h2>
+<pre class="r"><code>library(ggplot2)
+library(reshape2)
+# the dataframe is converted from wide format to a long format
+top_melt &lt;- top_normal %&gt;% 
+  add_rownames %&gt;% 
+    select(rowname,os7,os8,os9,os10,os11,os12) %&gt;% 
+      melt</code></pre>
+<pre><code>## Using rowname as id variables</code></pre>
+<pre class="r"><code>(p &lt;- ggplot(top_melt, aes(variable, rowname)) + geom_tile(aes(fill = log10(value)), colour = &quot;white&quot;) + scale_fill_gradient2(low = &quot;blue&quot;, mid = &quot;white&quot;, high = &quot;red&quot;, midpoint = 2) + theme(axis.text.y = element_text(size = 1), axis.text.x = element_text(size = 4)) + coord_fixed(ratio=0.15))</code></pre>
+<pre><code>## Warning: Non Lab interpolation is deprecated</code></pre>
+<p><img src="data:image/png;base64,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" /> ## cluster otus on heatmap</p>
+<pre class="r"><code>euc_dist &lt;- top_normal %&gt;% dist(method = &quot;euclidean&quot;) 
+otuclust &lt;- hclust(euc_dist, method = &quot;average&quot;)
+den_order &lt;- otuclust %&gt;% 
+  as.dendrogram %&gt;%
+    order.dendrogram
+den_order %&gt;% str</code></pre>
+<pre><code>##  int [1:251] 200 65 116 88 218 56 212 204 231 106 ...</code></pre>
+<pre class="r"><code># euc_dist %&gt;% head
+# typeof(euc_dist)
+# mode(euc_dist)s
+# class(euc_dist)
+otuclust %&gt;% str</code></pre>
+<pre><code>## List of 7
+##  $ merge      : int [1:250, 1:2] -22 -62 -215 -186 -36 3 -114 -206 -250 -107 ...
+##  $ height     : num [1:250] 8.08 19.35 22.84 26.07 36.39 ...
+##  $ order      : int [1:251] 200 65 116 88 218 56 212 204 231 106 ...
+##  $ labels     : chr [1:251] &quot;denovo1015897&quot; &quot;denovo1017076&quot; &quot;denovo1022006&quot; &quot;denovo1031142&quot; ...
+##  $ method     : chr &quot;average&quot;
+##  $ call       : language hclust(d = euc_dist, method = &quot;average&quot;)
+##  $ dist.method: chr &quot;euclidean&quot;
+##  - attr(*, &quot;class&quot;)= chr &quot;hclust&quot;</code></pre>
+<pre class="r"><code># otuclust %&gt;% class
+# otuclust %&gt;% mode
+# otuclust %&gt;% as.dendrogram %&gt;% str 
+# otuclust %&gt;% plot
+
+table &lt;- top_normal %&gt;% add_rownames
+table$rowname &lt;- with(otuclust, reorder(labels, desc(order)))
+
+top_melt &lt;- table %&gt;% 
+    select(rowname,os7,os8,os9,os10,os11,os12) %&gt;% 
+      melt</code></pre>
+<pre><code>## Using rowname as id variables</code></pre>
+<pre class="r"><code>(p &lt;- ggplot(top_melt, aes(variable, rowname)) + geom_tile(aes(fill = log10(value)), colour = &quot;white&quot;) + scale_fill_gradient2(low = &quot;blue&quot;, mid = &quot;white&quot;, high = &quot;red&quot;, midpoint = 2) + theme(axis.text.y = element_text(size = 1), axis.text.x = element_text(size = 4)) + coord_fixed(ratio=0.15))</code></pre>
+<pre><code>## Warning: Non Lab interpolation is deprecated</code></pre>
+<p><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAqAAAAHgCAIAAAD17khjAAAACXBIWXMAAA7DAAAOwwHHb6hkAAAgAElEQVR4nO3de3xV1Zn4/+dwv8k1LG5yERIuYauAVxIbI1g1wXppY7Q6aq1t0s70J7GV+uqM306mX2f6sthK+u20Ja1jbce2UlupFaJtpUglWu+XY1ASkItc3KAIyh3M7499kpyQs591TE6QrP15/zET8jx7nTOveeHDWvtZa8UaGxsFAAC4pdsn/QUAAEDmUeABAHAQBR4AAAdR4AEAcBAFHgAAB1HgAQBwEAUeAAAHUeABAHAQBR4AAAdR4AEAcBAFHgAAB1HgAQBwEAUeAAAHUeABAHAQBR4AAAdR4AEAcBAFHgAAB1HgAQBwEAUeaGXr1q2f9FcAgAzo8Ul/AeCTVFlZmfo3R49oj3XvIZve0BLGTZUt9VrCmBx59jEt4exLZMdmLWH4WPnL/2oJn/4nLQrAdRR4uGTNQ5UPxsUY4/u+MZ5IXCT42QR/jMd97+rKkmnWkbrb/mqMm2pJGJNjSTj7EkvC8LGWBEo4gHAUeLjNGM+YuO8bkbjvizGmVbjtDH7r1q2jR48+bt8PADpJrLGx8ZP+DsAnJnSJ/jd3a499/jZZ+7yWMPlM+wL76j9qCfmXy1MPawnnXSn+Ji3BjNOiAFxHgYcz2q7PGzNHxDfG+H7c90WCCX1hQUFW+CjM4AG4gQKPSAudwQNAF8c7eDgj5Qze91eIGBExxvP9Fb4v6TXZ/WiBFv3aQvnF/9USvvB/7Ev0W9dpCaMnyeP3awkX3ygNL2kJ2TO1KADXMYOHS1J20Uui1U5EJB5fYS5QCzxL9ADcQIFHpIUt0b+/RXtq8Bhp/EhLiHUT/S9WLCZHD2kJ3XvJtjotYVSu2NcAAEQYBR4uCemzCzbIBRN6muwARAMFHpFGkx0AV9FkB5eEvYMPJI60u+Cf02iyO3RAi/bqI3VPawm5s+W1v2sJp37q+1/Q4t/4hWx7XUsYNV3kvW1axtBRWhSA65jBwxnK+nwyS4FniR6AGyjwiLSwJfp7btaeuvVeWVCkJSyskWd+oyWc+3l5VD0r79LbRDaoU/gJ0+WD97SEk4ZqUQCuo8DDJamW6L2m4+f9eNw3xvNKS2iyA+A+CjwijSY7AK6iyQ4u0ZvsRMT307wuduUSLVpYKvv2aAn9Bsre97WE/oNfW67FTy2WXepVMkPG2bfaA4gyZvBwBk12ANCCAo9IC12if7ZGe+zsInlCbaKb+3nZ8baWMPxkOXpES+jeQ574tfoR19qvrAUQYSzRwxmZmcEnnK12yYvI3M9bEoafbEnobvvbN/daSwIlHEA4CjyiIzjoptWv2s7gWaIH4AaW6BFpoUv0727VHhs2erd6iNygUfLKo1rC6ZfK269oCSefLjvXawlZE+0fASDKKPBwSdtVet+XYNbu+77nzRGJy3Sa7ABEAAUekdbuk+z07fKVlZW3z9NGuGuZiK9ugzPjXlP7/E4tkpf+qCXMvFyLAnAeBR4uCemz84PfBIfZtdoHz0E3AFxFgYczUlZ3Y8T3W+6D9332wQOIBgo8Ii1sBl+v3vWa8yn78viT92oJ598scmCfltGn367NWnzIWHn3LS1h2ClaFIDzKPBwifWoWuEkOwARQYFHpIXN4K09dO+8oQ07YqrIi3/VMmZd+LP5WvzLVbL2SS1h8vkif31Ay7jwOi0KwHUUeLgk5LpYP7g0Nh5fIdL6ulia7AC4ipPs4DpfJGiv84LC7+8QUQo8S/QA3MAMHpEWOoOvf0F7LOcMeSuuJZziyeu1WsL0vD3btfjAkWK9cFY2qe8Jxk3VogBcR4GHS8Ka7Jr3yImYVkv0bTGDB+AGCjwijXfwAFzFO3i4JPws+qaz7NK8LrbuL1o099P2s2xl3ctaxqQZ//stLf5P37V38jc8pY2QfZ4WBeA8ZvBwScol+qT1eTHGM4UFLNEDcB8FHpEWtkS/4TntqQlnSfwxLcG7RF74g5ZwxmdFXnxCy5g1V/+rGYuJvdEPQIRR4OEM9Sx609Jwx0l2AKKAAo9Io8kOgKtosoMz9Bn8x2uyk63rtOjoSbL5TS1h7BR5d6uWMGz0tjotPipX5H1fyxhsZNt6dYiJWhSA65jBwz1hrXa+v0LEsEQPIBIo8Ii0sCX6fbu0p/oNEfE3aRlmnOx6R0sYMsJ6UJ31utijh7SE7r20KADnUeDhDHWJXozxgp9lOjN4ABFAgUek0WQHwFU02cElYWfRS9Jx9Gk12VlPkbMm3D5PG/+uZSJ7dmoZA7M6/h208QG4jhk8nGFdok+rwLNED8ANFHhEWugS/eGD2mM9e1vn37JD7ZEbPvbVZVr8tHlcFwugQyjwcEkGluiZwQNwAwUekUaTHQBX0WQHx6R8Ey/ii/i+L77ve1dX2pvsPtyhRQcMl53qSXdZk2T901rCxNkir67SMk4rkF3btYQhI7kuFoCCGTxckmqJ3ms6pNYYIyI+++ABRAIFHpEWtkT/xE+1p+Z+Rd5cqSVMKZRnfqMlnPt5eeyHWsIlt8iff6QlXPQ1kfoXtIycM7QoANdR4OGSlE12wfzd8+aIxOPx1kv0vIMH4CoKPBwT3khvPM+IiOQWFGSFP88SPQA3UOARaaEz+Afu0h677nb59xu0hP/4pfzs21rCl78jT/xaS5h7rdx5s5Zwx73ykLrKX3KLFgXgOgo8nBHSPx/3/cTcPXGkHfvgAUQBBR6RFjqDX/OM9ti0c2XTGi1h3LRDe7V4r/4iBz7UMvoMkM1vagljp8jRI1pCdzbBApHGfwLgkrAmO2PMx7tsRqada0kYZxmjV3/bR/QZYEkYO8WSQAkHEI7/QMB5if3vflzEGOO3irWdwbNED8ANLNEj0sKW6Ff/Snsq/3o5vF9L6NlX5A/qNvbPfu2VP2nx0z8jv75DS7j2TrG/BQAQYRR4uCTlEr0xXnBUrYgnEuckOwCRQIFHpIU22T35kPbY+SXy5nNawpSzZOUSLaGw1HoWnn2R4KCa0buvFgXgOt7Bwxkpt8kZk9gdJyKJd/D6DD7h/BJLwpSzLAmFpZYBCi0D9LQWaEo4gHAUeLjNT9T2oO778bjvTU8K02QHwFUs0SPSwpbo7/269tTNP5AFRVrCwhqxHjOnH3pfWVkpO97WRhh+8rMPavGzr9aiAJxHgYczwpfo/WCnXAJn0QOIAgo8Io3b5AC4infwcEnYVXLGeL6/IjiaPq0mu+d/r0XP/JzI9g1axsgJuzZp8SHj5Ptf0BK+8Qt5Wr2MZva1suo+LaHgJi0KwHnM4OGMkMtmfEks0rMPHkCUUOARaWFL9BvUXe4TzpKX/qglzLxcVlRrCXPKRA4f1DJ69rauIry2XEs4tViLAnAeBR4uaTuJ933xvDmJa2aMZwxNdgCigQKPSKPJDoCraLKDS1I12XnGNJ12IyKS5nWx617WopNmyFNLtYTzrpD7vqMl3PRt+wL7Oxu1jBHj5dGfawmXfkmLAnAdM3g4QzmqNh73Wxbq9QLPEj0AN1DgEWmhS/TrX9Eem3i6vBXXEk7xttVp8VG58ujdWsKlt4n1I97doMWHTdCiAJxHgYdLQpboJTiTPvEbtskBiAIKPCKNJjsArqLJDi5JOYMP/qfnGd+Pi3imUN0mF7DeBNPxBNH/bR2LWUe4+0ZtgNvu16IAnMcMHi4JOcwuuA/eJGo8S/QAooACj0gLW6K3zp4/OqoN2627yKY1Wsa4aUu0T5DSSnl1mZZw2jx5W93Kd/IMLQrAeRR4OEM9i16k6Uj6VtvkeAcPwFUUeLgk5VG1xpjmn8V60A1L9ADcQIFHpIXO4BeUaI8tfEheWaklnF64+SUtPnamyIM/0DKu/rq88ayWMPVs2fOuljBwmBYF4DoKPFyiHGbXvErvXV3JDB6A+yjwiLSwGfzqX2lP5V8v77yhJYyYKof2agm9+ttPstu1SUsYMk5kk/olxk3VogBcxz54uCTVPngj0nRRbNBnV1hi3weff70lYYStevbqb0m49DZLwpBxlgRKOAAFM3g4I+X6vO+vaLpQLtgHbyvwLNEDcAMFHpEW2mR36ID2WK8+snWdljB6kn2B3VczzLj4Y1rcu0Tef1tLGHyyFgXgPAo8nBHWYSci8XjzPJ5tcgCigQKPSAubwe97T3uq31CRP/5Uy7j8K/LL/9QSbvg3aVA30mXPlD+rnX4XXS9v/ENLmHqOFgXgOgo8nKEcRO/7vuclfuYkOwCRQBc9oiCo+p4X9NUnaVvOWaIH4AZm8Ii0sBn8myu1p6YUprFJfdt6LWPUxBf+oMXP+KxsjWsJoz2R930tY7DRogBcR4GHM8KX6IPfJdJosgMQCRR4RBrv4AG4infwcEnKk+yCW2Kbcywz+HQd+FCL9hkgT/xGS5j7+Ye/q8Wv/JbYm+Q5qhZAOGbwcIbSRd/EGOPLdJboAUQABR6RFrpE/9N/1R77yn/Jyt9pCYVXyYrfaglzrpEnH9ISzi+Rx+/XEi6+UZ7+k5Yw+zNaFIDrKPBwRthJdsnH2AlNdgAiggKPSKPJDoCraLKDM8Jm8L4f931p6rnzTGGB/brYVfdp0YKb5NklWsLZpZZ/KFRWVsq6l7UhJs14+tdafPa1Un2LllD2Qy0KwHnM4OGSNPrsWKIHEA0UeERa6BL94n/THiv/T/nGlVrC9x+WZ5ZpCefOk//7RS3h//yP/PzftYQv/Yf8z39oCV9UHwfgOgo8nGGdvgcb4pnBA4gECjwijSY7AK6iyQ4uSXmSXXN7XYrrYkO9t02LDh0lO97WEoafbE34UL0pZoAReb1Wy5ieJw+pfXQlag8eANcxg4czwpboRbyglz6o8ZxkByASKPCItLAl+t1btacGjZaPjmoJ3bqn8dmHD2rRnr3f26jFh46XPdu1hIEj0/gOANxFgYczwvbBiwRb4Y3nGd9nBg8gGijwiDSa7AC4iiY7OEN5B9/qTbw+gw8c3q9Fe/YV8TdpGWacbGnQEsZky3OPawlnXSy71CX4ISOtZ+FpUQCuYwYPl6Tsok9OMMZ2VC1L9ADcQIFHpIUu0S+5R3us9FZZ84yWMO1c2btbS+g/SJ5+VEuYfak8slhLuKzcfp8sgAijwMMZ+kl2xngivojfaomed/AAXEWBh0tSLtEHJ9Q2pRivtIQlegDuo8Aj0kJn8Ds2a48NHyub1mgJ46ZJ/QtaQs4Z9X9X458SOXpEy+jeQ7at1xJGTdSiAFxHgYdLUs3gPWP8pOtimcEDiAYKPCItdAb/5EPaY+eXyF1f1RJu/4m8+ISWMGuufSfeI9VaxmVl8pq6CHDqp7QoANdR4OGSsMtmgh3wiW67C2iyAxABHHQDtwVlPh43xkhTyU/StpyzRA/ADczgEWlhM/g3VmhPTZ0j8o56FcyI8fKSOsTMOfpSQWVlpX0nvfU7AIgwCjxcEnaSne/7njdHxPf9uLmgkstmALiPAo9IC5vBN36kPRXrJrL/Ay2j70nybI2WcHbRkmM/uZXSSllXqyVMyhPrIoEWBeA63sHDJSEzeNO8U85+Fn0g1s2W0fckS8LZRXq8tNIywKQ823eghAMIR4GH64Jr4BMb4X0/LjsKpLnA02QHwFUs0SPSwpbo163WnpqUL7L9LS1j5Cm71Otkh4yTfbu0hH5D5O1XtISTT5f3t2gJg8doUQDOo8DDJWH74JuvnPF937uaJjsAEUCBR6Rx0A0AV/EOHi4J2yYnLTvl4q2uiw2z+SUtOnamPPNbLeHca6Tqy1rC/J+JfHRUy+jW/ZHvafHLvik1VVpC0XwtCsB5zODhjDTug4/7fuujattiiR6AGyjwiLSwJfpDe7WnevW374Pf+JwWH3+W/bttelGLjpsl2+q0hFG59o8A4DAKPBzTdh7v++J5c4wRCbbJ6Uv0zOABuIECj0ijyQ6Aq2iyg0tSNdm1Os9OJL2T7GRLgxYdky2+us/djJNNb2gJ46bWr9LiOQUie97VMgYOk3UvawmTZmhRAK5jBg9nhDTZ+SLNB9mJCE12AKKBAo9IC12if109ym56vn0Gv+xeLWHezVKvNtHlzJLNb2oJY6dI/QvqCGdoUQCuo8DDJco++AAn2QGICgo8Io0mOwCuoskOLgk760bEM0Z8P42DbgI712vRrImya7OWMGSsyDsbtYwR4zc8q8UnnC3ywl+0jDM+Le9u1RKGsQ4BRBozeDhDqe5N59kZY3z2wQOIBAo8Ii10iX7XO9pjQ0bof29iMZEG9Tj77Jly4EMtoc8Aeb1WS5ieJ089rCWcd6UWBeA6lujhkpT74I3xfV+MSazSp3XZjAwZocdjMdsI2TMtCX0GWBKm51kSKOEAwnX7pL8A0Mn84AV8PL4iHo+LeGZ4UrCyja1b1RfbUdFQlR+LxcprOjBETXnrEYIhY8cMW1Peno9p/9drqMrv4P9dQFfBDB4umVZSWVmS/IvmPxSUlLRND1+it97jskG9S2bCWSK1j2gZeZdZ3wLICvVK2jnXPHq3Fr/0Ni3ayRqq8nMqalv/5saK2rLljYtzqvJzivNz61fPzxZpqLqzWvIW5Ry/b5Y9rzSvouLOqgVF87OP36cCnwQKPJyhXBcbrM/H4ytEPK+0pOWo2rYFPmiys17FNsF6HVzeZZYE21sAmXONHv9ES7iipjxWXH3M7xqWLamVvNKcpgq7ZFnD/PnZwW8XzTuepTb584/jxwLHHwUezgiZvhc0/7mgoECOETaD362u0w8ancZVrbZz6Fbdp8ULbhLZu1vL6D/o8H4t3rOvFv2YkmfkZcsbFxcd8+u8sjKprq5tDpUtb1ywNnkSX19XK1I2OVtEsid7ItV19SKybEnTb2vKY8XVzY8n/anVWkDeomDi30pNeay4OhEJsluPc+yjwedT4eE+CjxcknISb0xwGH3iRPq09sEPsm2Us9+2PnaKHi+4yTZC/0F6PKMlXBGUyZZ6WxyT5Y2Li6SmPKeiNiicNeWx4ub8osWNRSINa5OGaFgbP2bQ+NoGkbpakbzcHBEpuqJMqquX1iwuKhKpWVotUnZFkQQfkajXNeWx4oobq+a1LfHK107U9ZryWHFOvgQ1Pic3T6S2rl6EAg+nUeDhjLDLZnzfj8d9Y0yKZ8KW6I/D1+0yapZWi+QtWlAkIpI9/46yiuLqO6sWFE1eWi2SVzovW0SKFizKq65Qt/W1FVR9b3K2SKsK31LfpWhxY+NiaajKjyUGT78u1yR9vcT3S8zasyd7IrXxtQ1SRIWHyyjwcEZ4h52k7rCT8CX6+GPaJ3mXyFO/1BLOu0Fe+IOWcMZnLWfiVlZWfrNYicv3lou8vVbLOHmyFk1bqzKcxu9TCmpq8m+8ydnS6usXXVEm1fG1DSJLq5v/PZFYY89bVN+4uj7Fq33b166tyIlVtPySWTsihQIPZ6Scwfv+iuZWu0CrJfqwGbx3ieXDzrvBknDGZy0J1kPvv7fcMkKmSrgubL7bjnlwkNywNp5YmG/975OiBYvycpYsqymNN0+8g7l84o16vUjTgn7aXzvlS3sgIijwcIbaZNemvS4QNoN/5w3tk0ZMFdmzU8sYmCV1T2sJubOtm9w+3KElDBgusmmNljHOfpxPWoLF84qFNfMXFwX72qTsjvnZIleUSXWiWa1moWV9Plgjb+6sy1s0r+1SedDfXlwreYvuTyrKwbp98MGpluiTXqk3LFvS/DWKkr5e6+a7j7X2AHRdFHg4I7zDrmX6Lmk22Y2YassYmGVJyJ2tx62b3AYMtyRkrIRbFC1urM/NzymOBQvkzT3qRYuXl1UXV+TEKqRs0aI8UWt89vzVy+tiwRhlyxvnZ0vbbrfseaV5FbW1TfP3pk+oTjy1aJFUVKRYSgjaAopj1cHXqK1t/trLJVbctEbf0vxf39LbB7iMs+jhjLACH2gq86bVPvi2aLJrl2P2p32cp+Q4L6N/Ih8KfAIo8Ii0sCX6p3+tPTX7Wlmg1rGFNSIfvKdlnDTU2mQna5/XRph8pmx4XUuYMF2Ldlxih3pZYstc8j72jzeG97Ef65Ca8lhxnPqOCKDAwxnKSXaS+LX4vu9dXcl1sZnR+kDaj1/eRYJyK8ezwh/3DwQ+KRR4RFrodbEA0MXRZAdnWGfw8bhvjGd5B5/w0A+1aMkt8oNbtISv/1D+9DMt4TNflsV3aAnld8r/U9vw/r+75e/qXvtP2TbqAXAaM3i4RK3xkrghXr8PniV6EZHembhI+uBHGRgEQHtR4BFpYUv09h66g+pNL737SsNLWkL2zLdf1uInzxA5sE/L6NNPHleP07vYdhaPggIPdH0UeDgjfPpuPM/4flyEGXyaKPBA10eBR6TRZJfaST0zMMgHhzMwCID2oskOLmk7iRcxwQ/xuO95c+wz+MC9X9eiN/9A3n5FSzj5dKn7q5aQe6HsqNcShuekcVRt5102079X+58FcGJgBg9nhC3RByvzqS+baYslehGRSUMzMMg69agfAJ2MAo9IC12i37FZe2z42L3qXTP9s9KYfx86oGX06iO7tmsJQ0bqf3djMS1q4Rl7jlXct+cA6DQUeLjEet+MMZ4pLOAsepuzT87AIM++nYFBALQXBR6RRpNdankTMjBI7YYMDAKgvWiygzNC3sH7In7LC3jrDD6wZ5sWHThKZO9uLaP/INmkXik/burP5mvxL1eJvPGsljH1bPlI3YfWrQNb3XpnoosewCeKGTxconTRBzWey2bSc3Embpp/fE0GBgHQXhR4RFroEv2WBu2xMdli63D76KgW79Zddm3SEoaMs36CHDmoJfTorUUt5p3agYebLHstA4MAaC8KPFzSdgbv+2JM0BKeuDGWbXJpuHJmBgZ5WD2sF0Ano8Aj0miyS+2qszIwyO+ey8AgANqLJjs4QznoJtgpF4/7xhjLDD5hyT1atPRW+V2VlnDVfNn8ppYwdspHR7R4tx4ia5/XMiafKTu3aAlZY7Sorgf/ZQC6PGbwcEnKJrvmxfkAS/RpuOFTGRjkl3/PwCAA2osCj0gLXaK3HfP+81u1+JfukXff0hKGnSKP/VBLuOQWeW+jljB0vBxWb6zt2VeLWtxU2IGHm9y3MjTUUJWfU3dH42L1Vl4AHcJCHLqKmvJYcbWI5C2qXz2/vjx2Z2796vnZrXPCb4wVYzwR3xgjuWnsg7fe1PIldQlfRIadYkm45BZLwtDxloQOlXDL0J37X4aahRW1UtapHwGAAo+uoKY8VhxfVN9Yvyw/Z4mISNHi5UtjOfnStsYfw/fjvu8bE9wHL77vm+EF0lzg287gWaIXEenRmQfd1JQXx/PyOvEDAIhQ4NEVNFTdWZ23qH5+tiRtTi9asCgvp2JhzfzkZd5pJZWVJcmPtvpDCmFL9DvXaU9lTZJ31HPqRkwVeSuuZZziPfxdLX7lt+TQXi2hV3/Zoe7VH67/y0fXo3sHHtY1VN0py+8vvTOnrtM+AoAIBR5dQX1drXh3HFuvsid7bTLDLptp5vu+KSwpsM7gsyZZvtOIqbZvfUrbr9fKld+yDNCrvyWhQyVc98NHW37++hXpPvWDpdaUhqobl5Tev1qW3dmu7wUgfRR4nPhycvNkydoGKWpV0GqWVkveopxWmRmbwct2tUdu5CnW+2SPqJfB9ugjK+/VEgpvth91t2+XltBviBa1WPC5lp+7pz2bT35KRBb+vk1GzcIlpfevbrUUA6CTUOBx4suef0dZRfGNVfNWz2v6VUNVfnG1lC1PfgOfcvru+yuC4+iNkXh8he+L5Sz6hJG2HrnhY/V4jz6WAQpvtiQMGWdJ6FAJ13XOPvia8mK5o7Hz1h0AJKPAoysoWtzYWFMei1WIiNTmxCpE8hbVN1oa7EREPG+OSHDKjRgzxxjfDE8K02SXWqc02dUsrZbq6lh105+LY9Vly9kqB3QW9sEj0sKW6J/4qfbU3K/IwQ+0hN4nybsbtIRhE0Qa1KPas2fKupe1hEkznlisxeeWa1GLyhs78HDzIPeHhtgHD3Q+ZvBwhrJEn5RlvNI0muzmfsXyYb1PsiQMm2D7vtm2C10mzdDjHSrhOo6qBbo+ZvDoEppOuTlWR5d4Q5vsdm3XHhsy8kNfiw8wIts3aBkjJ8iff6UlXHS9PKSedVdyi+zdrSX0H6RFdd/NxL8dvqWuMADoZPw7HSe+hqr84uq8RdZDbdST7CTYI5fuZTNDRurxAUaPi4ycYEm46HpLQontrLuOlHBd+p3zAE5UFHic+Orrao9pmE8pbBN84iC7lovhk9Bkl1p3/ssAdHn8NcaJL/U++DY+9iZ4UZbon3pYe+y8K+X11VrC9HzZs1NLGJglr6zUEk4vlJW/0xIKr5Ijh7WEjnTCM4MHuj7ewaMraKjKz1lSal+jD7kuVkTE933PmyPS+iS7tpjBi4j8aEEGBvnawgwMAqC9KPDoChqq8nMqalMEOq3JLuJ++q8ZGOQr/5WBQQC0F0v0OPE1VN1YUZtWKU81g/c8z/h+0GdnjPFlejpNdrb74GWTetvMuKn71Q73voOk/u9aQs6nRA7s0zL69JP96mb8vradfIpuLNEDXR4zeJz4aspjxWKv7+Et9EF3nR/00lu66FmiFxH5n//IwCBf/PcMDAKgvZjB48TXsSa7Au2ZsCX697doTw0ek8Z1sS//TcuYcYH+LqCyslLu+442wk3flr3vawn9B2tRHU12QNfHDB5dQVpNduHb5Pzm6bswg0/LA3dlYJDrbs/AIADaiwKPE1/YMXZCk11n+e33MzDINd/IwCAA2oslepz4ihY3NqZ36mnKbXLBD75vgm679Jrs1j6vRSefKcv+R0uY90V58a9awqwL7fvgDx/UEnr2lo11WsL4XC2q46AboOvjrzGiwRgjvh8X8dK7LnbymZYB533RkjDrQkvC6YWWhJ69LQkdKeG6zrtspmU5Jq3DhwG0G0v06BKO+2UzO9Uuu6wx1m1y8vSjWsLsS633yX50VEvo1l3kmWVaxrnztKjukUzcE6AwwlIAACAASURBVHNZmxtrknsp0twbAaC9KPDoAmrKY8XxRfWr50vzNeINVfk5FV6r+qDfNNOMJrs0LLs3A4PMu1kN15TH7sxlEg90Ggo8TnzN9T07uSike3ytiia71B6/PwODXHyjEszI//sAKHgHj67Bm5wtIpKTm1dbVy+SLZI9rzSvIvGziITM4H1/xTHH0ZvCAu0s+sCL6l0zs66UX9+hJVx7p7y3UUsYOl4e/q6WcOW3RN6KaxmneKL/6zwW06K65Nr8l/9N96lP/1NaaYmDh/MW1VPdgU5EgceJL+mgm+zJXjpn3rQwxvi+HHPxTIuwJrtZV1rGvfZOS8LQ8ZaEK79lSZBTPEtCR0q47m+/bfk5/Ya75KdE5IJrUqdlz1/dOF9qymM55ZN5Bw90Gpbo0QUkv3BvXqTv3CX6V1dpj51WIFvXaQmjJx3er8V79hV5aqmWcd4VclAdondf2b5BSxg5QYvqVv2+/c82K/icGuYdPNC5mMGjC8iev3p5Xay4/IrGxUVFi5cvjeXEKkSkbHnjMdVB6bMzxguW6y1NdgmnqSfcisjoSXq8Z1/bR5x3hSWht22IjpRwHUfVAl0fBR5dQ9Hi5rWm9M+9EQn2vouICW6WM6Z1S33oPviI696zU4ZN3hrXsDaeV7qA6TvQaViiR6SFLtFbb2Ktf1FLyJllPahu1X1avOAm2bNdSxg4UqThJS0je6YW1T3/ePufbXbmxW1/l2iwE+n4GQYAdBR4dAlJdaGVY4pE2yV635fgsthEv53PPvh0vPhEBgaZNTcDgwBoLwo8uoCa8lhxdadM+MJm8Kt/pT2Vf738Ub1u7fLbZcOzWsKEs6X2AS0h7zqRN/6hZUw955nfaPFzP69FLV59sgMPNznt/AwMAqC9eAePE1/N0mrJW7TAVt31k+ya74v1rq60N9nlX29JuNx2FeqEsy0JedfZvsTUc/R4h0q4jstmgK6Pv8boGhIH3WimlVReLZUPxn1jjO/Hm9vmE+fbmLhIsBs+CU12qVHgga6PJXqc+FKcO58poU12+/Zoj/UbaN+D/trftYRTP7VrkxYfMk5kw+taxoTpcueXtIQ7fq5FdXoLYZpyZmVgEADtRYFHV5DuS3ilyc73/eAHmuzSsP6VDAwy8fQMDAKgvSjwOPGF3RUrnXdd7KF92lO9+on8Ve2Ru/A6+Yl6FO1Xvyt73tUSBg6zrgHIfd/REm76thbVbVQXD9I0fnoGBgHQXhR4uKTtDD44f94YT8QPOu1azeC5TS61zW9mYJCxUzIwCID2opUGbmtaqI9L8374ZDTZpZb+BTMATlTM4HHia1qi74Sd8KEzeNtNMEcOaPEefeyL/GvUs2SmzRXZuUXLyBrz/ttafPDJWtTCVzsA02TGZWAQAO1FgUeXkPI1fN6iY+8iS7lEb4zXPHePx1eYC9R98MzgRWz/tkhT1pgMDAKgvSjw6KKCkt9ZTXZR975vz7Ea3PaVCIDjhzdt6FqSp/J5i+rbVveQPrvEQfRi3SaX8NAPtWjJLXLnzVrCHffKXV/VEm7/idyhHmV35wPy64VawrUL5J4KLeHWRVpU13kH3XDbDHC8MINHV9DqrpmwupDyqFrfXxHcEhtcCS8Sl+nsg7fSz/lJU7+BbX6VdF9sTXmsON7mJQuAjKHA48SXmdX4lMKW6Dc8pz014SxZ/7SWMHG2bHxeSxh/psgH72kZJw3dpJ4mN26WPPVLLeG8G7SoxcH9HXi4Se++x/6mpjx2Z25TTW+oys+pu4NJPNBZKPDoIpon8VqhD9sHLyIixvOM7zODT8eRQxkYpEcvNZw0mwfQCSjw6GLSKvRpo8nOLv3/RMRi6Y/aUJWfs6SUFXqg89Bkhy4me/7qxvkiUlMei8WOrfLKDD74jecZyS0oyLJ9ivUmmF2b1YSxsnurljBotMiRw1pGj56NH2nxWDd57ndawllXaVHdR0dbfVT7BunWPTTUdH0Q1R3oRBR4dAHKYfTpMp5nElU+N+nXYSfZDbGd0TJkrCVhkHWZv0dPPR7rZhmgIyVc17rAt1NYgW+oys+pkFQ7IABkEkv0OPE11/e2J9t0VNgSvb5QX1lZueU1bdgxp4r1qLuvX6Ql/ODPtjtbc2bJgQ+1hD4DtKjq0N52P9qiV/8Uv+zEq38BtEaBh0tSLdF7QW9dYhO88UyhukRPk52IHMjELrk+bXfJ8eIdOI4o8OgiWm2Fl0zN5mmyS2mvuoMvTf2HHvubtq9aOOsG6Dy8g0dXUFMeK67OW1Tf3JXVUJWfkxOra1UeUh50Y4w0T98lnRl84JHvadHLvmnvwpNXVmoZpxc+ercWv/Q2+cdvtYRzrhF55Un1I87XoqqPjrT7UU3R4sbGxZ0yMoC2mMHjxJd6YbfNb1MWeJG47xtjfJHg3ljbUbUs0YvI7m0ZGGTQqAwMAqDdKPA48YWciJKJg1JCl+g3vK49NmG6vLRCS5g5R95V98kNG733XS3ef5i886aWMGKK7by5tgfJpU1fn0iTdScCgE5FgceJr+MzeM8zIsFavfFKS2iys9i5PgODZE3MwCAA2o0Cj66g6R386uR38BW1HW/RoskuJb8+A4OYnAwMAqDdaLJDV1C0uLE+Nz8nJ9ZyP2pyy12z8D47X+TjXBd7WF387tlX5NGfaxmXfslyIVu/gd//ghb/xi9Enn5Uy5h9qbypXokz5SwtquqkJjsAxxMzeLgk7Kja4Oe0CjxL9CKyNZ6BQUZ7GRgEQLtR4HHi68TjUUKX6A+pB9H16mM5zbVbd9m7W0voP0jq1Btnc2dbz8J7b6OWMHS8FtVtfrn9zzYbOyMDgwBoN5boceKrr6sV7450qnvKGXzy9F3SXKKXXn0sCcpVKoH+gywJubP1eA/bV+hICdexRA84gAKPE1/R4uVlseLyK9rTUWeMJ+KHhsMum/nYn+OWjFw2A+CTxRI9TnzKZXId7aNv92UzHU+QA/u0b9ann3WEu2/UBrjtfi2qa1jd/mebZednYBAA7UaBh0vaLtH7vhjTqs+OJju7teoZuGma3P6jcgFkAAUekRbaZHf4kPZYz16y930tof/g/Wq872Cx7qPToiIisnen+hWsB+6He0M9pi9NU+eExxqq8nPq7uCiGaAz8Q4ezgg7ya7pFHpjjB+P+97VlWk02fXsZUnoP1iP97XE0yrhlq/QgRKuO9q5TXY15TkVtVLWqZ8BgAIPt/m+b0zz+rzxjtmbTZNdSp3XZBccQZhXVpYX0lUBIFNYokekhS3R71Zvihk0Wo4c1BJ69BbZ/4GW0fekdbVafFKe1K/SEnIKRLapR8aPav9Z8C8/0u5HW8y4LMUvG2pqpKgomyV6oPNR4OGSDOyDZwZ/jBf+kG7mGZ9Ne1AKPND5KPCItLAZ/NvqUW4nzxDZWKdljM/duU6LZ02yveju3sN6Fp59J157Pfe7dj/a4qyrwmMUeKDz8Q4ezgi/aaZl+i5iuy42cLL1mNXxuXo8a5JthO62v322s/A67+K7Tm6yA3A8UODhjGkllVdL5YNx3xjj+3FjPN9fITKneYne9/1gT3wLmuxSOspJdkDXR4GHS6aVVFaWJP+i+Q8FqR8I3Qe/Ul2kLrxKVv1eSyj4nDyzTEs4d97ml7T42JkiH7ynZZw0VHZs1hKGj9WiKmbwgAN4Bw9nhO2D930RMZ5nglvhZTpNdjZ/Uy+7T9MFXwqP8Q4e6HwUeERa6Aw+2p5YnIFB5pZnYBAA7cYSPVySseti77lZi956ryy/R0sovtWyu+yMz8ozv9USzr1GZNMbWsa4qavu0+IFN2lRHUv0gAOYwcMZyhJ9Uo23ddGzRC8iNYsyMEhRRQYGAdBuFHhEWtgS/T61v63fULHeJXNIvQy2Vz/Z8KyWMOFseX+LljB4jMiOt7WM4SdrUdWy77f70RbzvpGBQQC0GwUezlCb7ALGGJrs0vDHuzIwyOW3Z2AQAO1GgUek0WSX0sP/lYFBrvzXDAwCoN1osoNLUjbZNQVNMJtP67pY/Tq1bt3tt9HEH9MSvEtEDh3QMnr1kc1vagljp+yo1+LDc7So7ghNdkDXxwweztCPqjXGC35mid7ut9/OwCDXfCcDgwBoNwo8Ii1sif7wfu2pnn1Flt2rZcy7+b2NWnzoeJF9e7SMfgPlTuWkGJE7fi471Ta8rDFaVPXAv7X70RbX/WcGBgHQbhR4OCOsyS4e940JdsP7ImIK2SZn88tM9MfdkIlOPQDtRoFHpNFkl9J9t2VgkJvuzsAgANqNJjs4I42z6OO+n95Jdgc/0KK9TxJZ/6qWMfE0a5/eU7/U4ufdIHJA3Urfp9/BD7V47wFaVMdJdoADKPCIBj8e94MyL8OTfh12XWzvk2wDTjzNktCtux4/7wbbR/Tpp8c7UsJ1ndlF31CVn1NRKyJly7lsBuhMLNEj0kKX6JeoZ82X3ipPPqQlnF8i7/tawmAjT/9JS5j9GXnxr1rCrAvlHbWRb8R4Lar676+2+9EW//KTFL+sKY8Vy/LGxUXNP2TgkwCkwgweLlH2wfu+b4yRNC+bkdJbLQnnl1gSBhtLwuzPWBJmXWhJ6EAJ13XaDL5maXXeovoiESlasCgvZ2nN4iIqPNBJKPBwRtg++Hh8hYjxvMSe+FbPhC3RH7cvfWKa/7OWn7//hXSf+sYvbBkNa+PiXZEtIiLZkz1ZsrZBirI/9tcDkA4KPJwxraSystW0OvGHgoKCpF8m/6ws0T/xa+2j5l4rL/xFSzjj0zvXa/GsiSL627FYTGof0RLyLpNd27WEISO1qOp712fgqW/+qt2fDyADKPBwibJEH/wxHvdbHVUbOoOfe63lo874tB7Pmmj7srGYJSHvMktCB0q4jqNqAQdQ4OGSsEl8k4KSY34RNoNfoL4ZXlhjv+xV309fWVkpWxq0IcZkv6RO4GdeJo+qG80v7cBe9iPqFj8AXQIFHi4JmcEbY4JfxkU8U1ignWQXWFhjSZhwtiXBfmDOGMvL55m2CXxHSrjuyOHOGTf5vXvy+3gAnYACD7c13zHj+8b3fd9f4U0vkOYCT5NdSoc7a4m+6Iqy4uKFNfMXF9UsrKgtW04LPdB52AePSAttsrNtMbfeJ7vmCS1h2lz5UN0nP8DIvl1aQr8hUqfuk8+1bbJTfLO4/c82+97ylL+uKY8VV4tw0A3Q2SjwcElYk13SPN62D54ZvHRugQdwnFDgEWmhM/g9O7XHBmbJP9TydU6xbF2nJYyeZL+R9kV1EWDWXNn7vpbQf7AWBeA63sHDGSkPuvH9FU075YJImifZDbT14Z1jm+SOnqTHe/a1fYdZcy0JlHAA4ZjBwyWplui94B654FZ4EeOVch88gAigwCPSQpfoDx/SHuvZS3bv0BIGDd+prtBnTZLd29QBRolsflPLGDvFX6vFzWQtCsB5FHi45GOfZNcWM3gAbqDAI9JCZ/AA0MXRZAdnpGyyE4n7iQ3nH6fJbtV9WrTgJtm9VUsYNFpk5xYtI2uMHFTb6Hv3tY5w8AN1gJO0KADnMYOHS1I22SX+ZPyg0rMPHkAkUOARaaFL9PUvaI/lnPHGCi0+dY68/CctYcZn5NVlWsJp80TeU9vwho56c6UWn1KoRQE4jwIPZ6RcojdGRBJn2AWYwQOIBAo8Io0mOwCuoskOzgibwbeavpv0rovdGteioz2R/WqHW9+TrNe9Wy+MX/+0NsDE2WK98AZAlDGDhzNsXfSJrfAynSV6ABFAgUekhS7RP7JYe+yycvn29VrCd34lC7+mJSz4kby+WkuYni+3fU5LuPv3cs98LeHWKi0KwHUUeLgk5Ul2xnhJV87QZAcgGijwiDSa7AC4iiY7OEO/Lrb5sBvLWfSBj45o0W49RHZt1zKGjJQt9VrCmBz7Pvhd76gfMULe97WEwUaLAnAdM3i4JLyR3g9KvOcZyVW76FmiB+AGCjwiLXSJfv2r2mMTT5Nt67WEURNl3x4tod9AOfChltBngGzfoCWMnHD0sBbv3lOLAnAeBR4uCWuyEwnW5+P2y2aYwQNwAwUekUaTHQBX0WQHZ6Rxkp0xRkxhif0ku43Pa9HxZ8r+97WEvoNFtq7TMkZPeusfWvyUc0Q2rdEyxk2Tvbu1hP6DtCgA11Hg4bbkc2olaLbbIdJc4NvO14Ml+vFnWsbtO9j2yaMn6fFTzrGNMM7W7E8JBxCOJXpEWtgSvfWg+J/fqg37pXvksR9qCZfcYk+Q5x7XMs66+OHvavErv6VFATiPAg+XpGqy8zzPxOMrRJp67pKb7HgHD8BVFHg4JqyR3jQf+8I+eABRQIFHpIXO4Hdu0R7LGrOtTouPyhU5qh6G173H63/W4tMvEtnwupYxYfrh/Vq8Z18tCsB5FHg4Q+miF/FEfN9vs0TfFjN4AG6gwCPSwmbw29/Qnho5Vfa+qyX0HyZ7d6oJWbJvl5bQb4jYz8J79jEt4exLtCgA17FNDs5IOYMXSd4mJ2K9LjYwcqolof8wW4Jtr32/IbYv0W+gJYESDiAcM3g4Jvy02jiXzQCIEAo8Ii1sif6R72lPXfZN+eNdWsLlt4u/Vkswk+XNlVrClEKRZ9QLZc+d977aCDh4jBYF4DwKPFyScvouYjzPNLXaxWU6TXYAIoACj0gL3Sb3hnpS/NRzZK96GH3/wbJWPc5+8pl7tmnxgaPkwx1awoDhclC9b7b3AC0KwHk02cElSp+d7/vGGGM8U6i+g0+Yajspvr/tMPrJluPsB46yDDBguCWBEg5AwQwezgip7r4kirsflHnv6kqW6AG4jwKPSAtbon/+99pTZ35OZI+6EX7gsEN7tXiv/vKOutV+xFSRLfVaxpicXZu1+JCxWhSA8yjwcEnKJrtg/t6UYrxS9T54ZvAA3ECBR6RxmxwAV9FkB5ekvC7WGBHxg+PoRXzLNrmE3WoL+6Dh8vj9WsLFN767QYsPmyAr79USCm8W+egjLaNbt6OHtXj3nloUgPOYwcMxynWx8fgKY+ZYuuhZogfgBgo8Ii1siX7Lq9pTY06Tj9TLYLv1EPlQvUxmwJANz2nxCWeJbFSvpB2f+9FR9Tt016IAnEeBh2NCDrNLYJscgKigwCPSaLID4Cqa7OAS/cbY4JeWbXKJgZ7QotPmihzcr2X07itvqkvwU8565rda/NxrRF6v1TKm58mhA1pCrz5aFIDrmMHDGSmre9Bbl7xKb7kPniV6AG6gwCPSQpfod72jPTZkhOx4W0sYfrLUv6Al5Jzxl//W4p/+F3n3LS1h2Cki+/ZoGf0GalEArqPAwyX6En2AGTyASKDAI9JosgPgKprs4JK2M3jfl6SD6EWsM/iEhpe0aPZMqX1ES8i7zHofvLzvawmDjax7WUuYNEP8TVqCGadFAbiOAg+3ta7uxpjWVbXtfD2xRJ890zJw3mWWBNt98DLYWBImzbAkUMIBhGOJHpEWtkRv3Sb35kotYUqhPKWeVX/ejfaj5jeq++zGnyWP3q0lXHqbFgXgPGbwcEbYNjkR8f2WPru0luinzbUkTCm0JJx3o+0zunXT4+PPsgxACQegoMDDbcEmeGM8z2u6bGZ4Ujh0iR4AujiW6BFpoV30b/xDe2zqOfK7Ki3hqvmy9CdawhVfXf+0Fp84W2TD61rGhOmy8ndaQuFVWhSA6yjwcEnYKv3HWKJnBg/ADRR4RFrYDP7Fh7WnZl0pW17TEsacKrL/Ay2j70lLjv3kVkorRbarR9mNPGX/bvUTBmlRAM7jHTycEXaMnYjXfJidMZ4pLLBfNjPrSkvCmFNtQ/Q9SY+XVtpGGHmK5RMo4QDCMYOHS1JeBm+MJ+K3bIjPVQs8S/QA3ECBR6SFLdF/qJ4yN8CIbKnXMsbkbFB3sU84S75+kZbwgz+L1KlteLmzax/Q4nnXaVEAzqPAwyX6UbWJOf10muwARAAFHpEWuk3uhb9oj53xaVn9Ry0h/3J5XD3K7uIbpf5FLSFnlryoHqc3a648+ZCWcH6JFgXgOgo8XJLyHXxzNMUMntvkALiKAg9nKJfBB312Etw9Q5MdgCigwCPSwmbwyxdpTxVXiH2J3nrh7Ie7tIQBQ+TAPi2hTz/7Ij+ACKPAwyXqEr3xPCPCNjkA0UCBR6TxDh6AqzjJDu4Jm8cb4xljm8En7NisRYePtV4V8+S9WsL5N4v87Ntaxpe/I0ePaAnde1hPw9WiAFzHDB7OUI6qTb5vhstmAEQCBR6RFrpE//c/aI996rPy+motYXr+wQ+1eO8BIm+qZ91NOUsOHdASevWR99Xz9gYbLQrAdRR4OEbps0scSl9YQpMdAPdR4BFpNNkBcBVNdnBM+IVy6b2DD9xzsxa99V7LvwMqKysfvVsb4dLb5GfztYQvV8mmF7SEcWeIbN+gZYycoEUBuI4ZPJyhnGQnYozx43HfGEOTHYBIoMAj0kKX6H/5n9pjN/ybvLJSSzi9UF55Uk04X97dqiUMG23/DjX3aQlFN2lRAK6jwMMlYdfF+r7veXNEfBGf62IBRAIFHpFGkx0AV9FkB2eo7+DF931jjKTZZLdSPYeu8GZZfo+WUHyrWPfB1z6gJeRdJ/LGP7SMqee8t1GLDx2vRQE4jwIPt/m+33ROrWmu8S3azteDJfpCtYteRIpvtST0HmBJyLvOkiBTz9HjlHAACpboEWmhS/Qv/017bMYFRw9r8e495eghNaGXrHlCS5g2V8TfpGWYcbJ1nZYwepIWBeA6CjyckXKJPjiFXiTtffA02QFwAwUekUaTHQBX8Q4eLgk/iN54ngkulEuryW71r7Ro/vUi+/ZoGf0Gyo63tYThJ9ev0uI5BSKrfq9lFHxOtq3XEkZN1KIAXMcMHs6wnmTn++L7vnd1JUv0ANxHgUekhS7R2xrc9u/W4n0Hif0kuz+rqwQXXW9fJNizU0sYqNyZB8B9LNHDGSEzeF/EF/GCbrt0l+jFjNPjfQfZRjj9fEvCRddbEvoNtCRQwgGEo8DDdb7vS9JCvZjhScGwffDH7dsBQCdhiR6RFrpEv/d97bH+g+WlFVrCzDnWJfrnH9LiZ5bIAXWFvs9ArosFoKHAwyVhfXYfY4meGTwAN1DgEWlhM/id6hlxWZNk33taQr+hsme7ljBwpLy7QUsYNkHefUtNOEVku5ox8hQtCsB1vIOHS1Lug2/6oen22HSa7LJsx7z2G2pJGDjSkjBsgi3BWqAp4QDCUeDhPN+PixjPk6DGt4rRZAfAVSzRI9JCm+zeXqs9dvLkneohclkTZeNzWsL4s0SOqPfV9Ogpu97REoaMsL4mABBlFHg4JuUqfXBRrDGeiG8KSwqU/ePM4AG4gQKPSAudwb8Vb5Ob5BRPHvqhllByi6x/RUuYeLo8+AMt4eqvy8Y6LWF8rhw9oiV05wUcEGn8JwAuaTt9930xxjSfRS/W62ITTvEsCSW3WBImnm5JuPrrloTxuZYESjiAcMzg4QxlE/zH6KJniR6AGyjwiLSwJXpf7bEzk0X0vzixmHWJ/mfztfiXq9LYB79L3Ws/xLZRD4DTKPBwhnJdrDGcZAcgYijwiLTQJjsA6OJo0oFjwrfJeUGfXVpNdtZt7utqtYRJeVL/dy0h51MiH6jb2E8auv0NLT5yqsi6l9UvMUOLAnAdM3i4JGV1D1ro43HfGCPWLnqW6AG4gQKPSAtbot/ymvbUmFNFtjSoGdn2Y+YOH9QyevaWnVu0hKwx65/R4hPP1aIAnEeBh0uUGbzvi+/7njfHFBZwkh0A91HgEWk02QFwFU12cEbINjlfJHGGnYiIGK9UPYs+8MqjWvT0S9PYKL/q91pGwefkrw9oCRdeJ688qX6J8+v+qsVzL9SiAJzHDB7OUPbBNzPGY4keQCRQ4BFpYUv0Rw5oT/XoI3Jwv5bRu69sflNLGDvl0bu1+KW3yaG9WkKv/iLb1M18oyZqUQCuo8DDGfoMPrgxVtgmByAiKPCINJrsALiKJju4xLpNTkS8qyvTuC72+T9r0TMvkl3vaAlDRtj3wb+3TcsYOkq2rtMSRk/a/JIWHztTiwJwHjN4OENdojfGBKG4TGeJHkAEUOARaWFL9NvqtKdG5Yq8s1HLGDFeXv6bljDjgleXafHT5sn+3VpC30Ei9S9qGTmztCgA17FED5eELNG3ktZlM6NybRkjxlsSZlygx0+bZxmg7yDbd6CEAwjHDB7OsO6DT5R8lugBRAEFHpEW2kW/Sb2rddxU60F1R9SrZHr0Ftm9Q8sYNHzvu1q8/zB5YrGWMLdciwJwHgUeLkm1RJ+4Bl6atsKzDx5AJFDgEWmhM/hnH9MeO/uSP96lxS+/Xd5Tm/CGjpf//ZaW8E/flTdWaAlT51i27LOhH4g4CjxcoryGD+6KPfYdPAfdAHAVBR7OsDXZmaCpniV6AJFAgUekhc3gn/ip9tTcr8gzv9USzr1GdqrH0GVNEutlM9Zt7uuf1uITZ2tRAM6jwMMZKWfwxoiI+H5cxAtm88zgAUQCBR6RFjaDX3mv9lThzWI9i15er9USpue9o27EGzE1jcPq61/QEnLO0KIAXMdJdnBJ2GUznmd8P/EyPq2T7ApvtmUMGWFJmJ6nx0dMtX3E0FGWBEo4gHAUeLjOeJ5p/sH3462CbWfwLNEDcANL9Ii00G1yK9QmujnXyBO/1hLmXisvPqElzJor931HS7jp2/JsjZZwdpGs/J2WUHiVFgXgOgo8XJKBy2aYwQNwAwUekcZBNwBcxTt4uCRsBh+cQi8iIsYrLSnIsg309sta9OQZIlsatIwx2bL0J1rCFV+t+4sWz/20/ahaWblEyygs1aIAXMcMHi7RL5sREWM8U1igFXiW6AG4gQKPSAtbol9QpD21sEZeW64lnFossv4VLWPi6dbLXteoXXrT5opsrNMyxudqUQCuo8DDJSmX6INrZoyRYCs8TXYAIoECj0ijyQ6Aq2iyg0tSzuCN8YwRjvOMkwAABSNJREFU3/dFfPsMPuGVlVr09EKJP6UleOfJru1awpCRsnuHljBouGxbryWMmnhonxbv1U+LAnAeBR7Oa7pppqXVrkXoSXanF1pG9c6zJAwZaUkYNNySMGqiHqeEA1CwRI9IC1uit98Es6VeyxiTIwf3awm9+z71Sy1+3g1in+JbEwBEGAUezgi7Ltb34/G4b4xJLNpPp8kOQARQ4BFpNNkBcBXv4OEMZQbf/Pbd933v6so0muxiMS3a2ChXn6MlPPgPyRuvJdRutH/ElbO0hIdftH8EgAhjBg+XhF8203wlvO2oWpboAbiBAo9IC12if/jH2mNX/vOhvVq8V/8MnGQn/327lvEvd1k/QosCcB0FHi5RrosN/mifwbdVWVmpv5jvEgkAooZ38HDJtJLKypLkX5S0jhcczy8DAJ+kbp/0FwAAAJlHgQcAwEEUeAAAHESBBwDAQXTRAwDgIGbwAAA4iAIPAICDKPAAADiIAg8AgIMo8IDVzlU/rqysrPzxqp1aiha2J+xcs2anmpZISPrh444AIFIo8EAbO1f9uPKhNcH//vGqnZJV8M+VX5sz54LmM+yPTZA1dVJaKnVrwkbYuWqllJbKyqDytnl856of/+hvO6RpnJWPPRaWkPjBOgIlHog8CjxwjJ2rVkpp5fTXH1qzw/eNGS4iImvqJHeakuCv+NGSuL9jZ0hCVq6J/+hHcRme+vGsgn/+2gXDRXbukOFZWaNiW8MSgh96Px86gkwrKNhRJ4Uf7z4dAA6iwAPHyBouK35U+aBvZIcvfvzBlWtEdsrw3CwtQUR83w9P2OH7Ir5IVujjIiJZufK3ysoHdsszIQmBgUNCR5A1D1U+uGJFm0cARA4H3QAA4CBm8AAAOIgCDwCAgyjwAAA4iAIPAICDKPAAADiIAg90tpryWKy8xpbVUJUfmpbeCACQpMcn/QUA5xUtZjMqgOOOGTwAAA6iwAOqtivnNeWxWH5VQ9OPTZJyaspj+VVV5U2/PnaBPeQpERFZW5XfFEp8RupvZMkBAAo8oMqeV5on1UuTqvfSaskrnZctNeWxYlne2NjY2NhYvyivuji52tZWLMmtb2xsbFxc1Ho89SmprlhSWp+ISUVO2/rdUJWfUyGL1BwAEAo8YHNMhW+p70ur8xYtKEpKqq2rb3ksr3RedorRbE8tun9+8Fj2/PsX5dVWLGw9w69ZWFGbnLN6eVmbHAAQocADVtnz7yhrrvDN9V2KFjeuThTamvJYTkVt66e8yanq+8d5KnuyJxJfmzw/b/n0Jjm5rdcXACCBAg9YFV3RVOGTK2zLu/BiWV6/KC+9sdSn8nJzkv6Uk5tqzNqKnJZX+G3/iQAAAQo8YNdU4WuWVkvZHfOzRaSh6saK2rLEy/RjX7SHsjzVarle6utSFe+8xAv4JGl/PIAIocADaQgqfPnSaim7Iqim9XW1zT9LWDFuw/ZU8op8w9r4sW/yi64oO+YfAQAQggIPpKPoijKprm6p761ffteUF1fLsS/MU7E9VVtxY6IpvqY8p6I2sVqQ9DUWtG68rylnrxyA1CjwQFqKrigTSZp9Z8+/f1FedXHwJvzO3PrG5WVJ5TmM7amyRaVLglfsxdVly1OsvWfPX12/SJpfwxdXly1v7toDgCSxRg7RBADAOczgAQBwEAUeAAAHUeABAHAQBR4AAAdR4AEAcBAFHgAAB1HgAQBwEAUeAAAHUeABAHAQBR4AAAdR4AEAcBAFHgAAB1HgAQBw0P8PmGzHz77FUU8AAAAASUVORK5CYII=" /></p>
 </div>
 </div>
 

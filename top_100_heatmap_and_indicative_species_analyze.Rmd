@@ -91,27 +91,45 @@ top_melt <- top_normal %>%
 ```{r}
 euc_dist <- top_normal %>% dist(method = "euclidean") 
 otuclust <- hclust(euc_dist, method = "average")
-den_order <- otuclust %>% 
-  as.dendrogram %>%
-    order.dendrogram
+den_order <- otuclust %>% as.dendrogram 
+
+# den_order %>% order.dendrogram
 den_order %>% str
 # euc_dist %>% head
 # typeof(euc_dist)
 # mode(euc_dist)s
 # class(euc_dist)
-# otuclust %>% str
+otuclust %>% str
 # otuclust %>% class
 # otuclust %>% mode
 # otuclust %>% as.dendrogram %>% str 
 # otuclust %>% plot
 
 table <- top_normal %>% add_rownames
-table$rowname <- with(otuclust, reorder(labels, desc(order)))
+# table$rowname <- with(otuclust, reorder(labels, desc(order)))
+table$rowname <- table$rowname[order.dendrogram(den_order)]
 
 top_melt <- table %>% 
     select(rowname,os7,os8,os9,os10,os11,os12) %>% 
       melt
 (p <- ggplot(top_melt, aes(variable, rowname)) + geom_tile(aes(fill = log10(value)), colour = "white") + scale_fill_gradient2(low = "blue", mid = "white", high = "red", midpoint = 2) + theme(axis.text.y = element_text(size = 1), axis.text.x = element_text(size = 4)) + coord_fixed(ratio=0.15))
+```
+## replot with different methods
+above result is clustered not very good. So I will try with different subset data or dist methods.
+```{r}
+cohort2 <- top_normal %>% 
+  add_rownames %>% 
+    select(rowname,os7,os8,os9,os10,os11,os12)
+rorder <- cohort2 %>% 
+  dist(method = "binary") %>%  
+    hclust(method = "average") %>% 
+      as.dendrogram 
+cohort2$rowname %>% str
+cohort2$rowname <- cohort2$rowname[order.dendrogram(rorder)]
+top_melt <- cohort2 %>%
+  melt
+(p <- ggplot(top_melt, aes(variable, rowname)) + geom_tile(aes(fill = log10(value)), colour = "white") + scale_fill_gradient2(low = "blue", mid = "white", high = "red", midpoint = 2) + theme(axis.text.y = element_text(size = 1), axis.text.x = element_text(size = 4)) + coord_fixed(ratio=0.15))
+
 ```
 
 
