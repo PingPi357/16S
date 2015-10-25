@@ -297,46 +297,26 @@ top_melt <- top_normal %>%
 ## cluster otus on heatmap
 
 ```r
-euc_dist <- top_normal %>% dist(method = "euclidean") 
-otuclust <- hclust(euc_dist, method = "average")
-den_order <- otuclust %>% 
-  as.dendrogram %>%
-    order.dendrogram
-den_order %>% str
+library(vegan)
 ```
 
 ```
-##  int [1:251] 200 65 116 88 218 56 212 204 231 106 ...
+## Loading required package: permute
+## Loading required package: lattice
+## This is vegan 2.3-1
 ```
 
 ```r
-# euc_dist %>% head
-# typeof(euc_dist)
-# mode(euc_dist)s
-# class(euc_dist)
-otuclust %>% str
-```
-
-```
-## List of 7
-##  $ merge      : int [1:250, 1:2] -22 -62 -215 -186 -36 3 -114 -206 -250 -107 ...
-##  $ height     : num [1:250] 8.08 19.35 22.84 26.07 36.39 ...
-##  $ order      : int [1:251] 200 65 116 88 218 56 212 204 231 106 ...
-##  $ labels     : chr [1:251] "denovo1015897" "denovo1017076" "denovo1022006" "denovo1031142" ...
-##  $ method     : chr "average"
-##  $ call       : language hclust(d = euc_dist, method = "average")
-##  $ dist.method: chr "euclidean"
-##  - attr(*, "class")= chr "hclust"
-```
-
-```r
-# otuclust %>% class
-# otuclust %>% mode
-# otuclust %>% as.dendrogram %>% str 
-# otuclust %>% plot
+den_order <- top_normal[,10:11] %>% 
+  vegdist(method = "bray") %>% 
+    hclust(method = "average") %>% 
+      as.dendrogram 
 
 table <- top_normal %>% add_rownames
-table$rowname <- with(otuclust, reorder(labels, desc(order)))
+
+table$rowname <- table$rowname[order.dendrogram(den_order)]
+# > nba$Name <- with(nba, reorder(Name, PTS))
+
 
 top_melt <- table %>% 
     select(rowname,os7,os8,os9,os10,os11,os12) %>% 
@@ -356,5 +336,218 @@ top_melt <- table %>%
 ```
 
 ![](top_100_heatmap_and_indicative_species_analyze_files/figure-html/unnamed-chunk-5-1.png) 
+## replot with different methods
+above result is clustered not very good. So I tried with different subset data (line 92) or dist methods (line 93). But results are all similar. 
+then i use reorder() plot based on the value of os10.
+
+```r
+os10 <- table %>% 
+    select(rowname,os10)
+table$rowname <- with(os10,reorder(rowname, os10))
+# > nba$Name <- with(nba, reorder(Name, PTS))
+
+top_melt <- table %>% 
+    select(rowname,os7,os8,os9,os10,os11,os12) %>% 
+      melt
+```
+
+```
+## Using rowname as id variables
+```
+
+```r
+(p <- ggplot(top_melt, aes(variable, rowname)) + geom_tile(aes(fill = log10(value)), colour = "white") + scale_fill_gradient2(low = "blue", mid = "white", high = "red", midpoint = 2) + theme(axis.text.y = element_text(size = 1), axis.text.x = element_text(size = 4)) + coord_fixed(ratio=0.15))
+```
+
+```
+## Warning: Non Lab interpolation is deprecated
+```
+
+![](top_100_heatmap_and_indicative_species_analyze_files/figure-html/unnamed-chunk-6-1.png) 
+## pickout high abundant otus (>=500) from os10 and os11
+just like the first analyz do.
+
+```r
+top_10 <- top_cohort2_data %>% 
+    arrange(desc(os10)) %>% 
+      select(rowname, os10) %>% 
+        filter(os10>=500)
+plot(log10(top_10$os10))
+```
+
+![](top_100_heatmap_and_indicative_species_analyze_files/figure-html/unnamed-chunk-7-1.png) 
+
+```r
+top_11 <- top_cohort2_data %>% 
+    arrange(desc(os11)) %>% 
+      select(rowname, os11) %>% 
+        filter(os11>=500)
+plot(log10(top_11$os11))
+```
+
+![](top_100_heatmap_and_indicative_species_analyze_files/figure-html/unnamed-chunk-7-2.png) 
+
+```r
+top_cohort2 <- merge(top_10,top_11, by = "rowname", all = TRUE) # finally there 86 otus were kept.
+top_cohort2_data <- merge(mydata, top_cohort2, by = "rowname", all.y = TRUE)
+top_normal <- top_cohort2_data[,2:13]*311167/refs[rep(1,86),2:13]
+rownames(top_normal) <- top_cohort2_data$rowname
+identical(row.names(top_normal),top_cohort2_data$rowname)
+```
+
+```
+## [1] TRUE
+```
+
+```r
+identical(as.integer(top_normal$os2),top_cohort2_data$os2)
+```
+
+```
+## [1] TRUE
+```
+
+```r
+den_order <- top_normal[,7:12] %>% 
+  vegdist(method = "bray") %>% 
+    hclust(method = "average") %>% 
+      as.dendrogram 
+table <- top_normal %>% add_rownames
+table$rowname <- table$rowname[order.dendrogram(den_order)]
+# > nba$Name <- with(nba, reorder(Name, PTS))
+
+
+top_melt <- table %>% 
+    select(rowname,os7,os8,os9,os10.x,os11.x,os12) %>% 
+      melt
+```
+
+```
+## Using rowname as id variables
+```
+
+```r
+(p <- ggplot(top_melt, aes(variable, rowname)) + geom_tile(aes(fill = log10(value)), colour = "white") + scale_fill_gradient2(low = "green", mid = "yellow", high = "red", midpoint = 2.2) + theme(axis.text.y = element_text(size = 1), axis.text.x = element_text(size = 4)) + coord_fixed(ratio=0.15))
+```
+
+```
+## Warning: Non Lab interpolation is deprecated
+```
+
+![](top_100_heatmap_and_indicative_species_analyze_files/figure-html/unnamed-chunk-7-3.png) 
+It looks like total different from first analysis. So decide to load first data to compare with each other
+
+```r
+firstdata <- read.csv("otu_table_os_200otu--s0806-0813otu_Normed.csv", header=TRUE,row.names=1, sep=",")
+firstdata["denovo976096",1:6]/top_normal["denovo976096",7:12]
+```
+
+```
+##                h0730    h0806    h0813    s0806    s0813    s0820
+## denovo976096 2.47016 2.509546 2.365137 2.697058 2.459181 2.730176
+```
+
+```r
+firstdata["denovo208223",1:6]/top_normal["denovo208223",7:12]
+```
+
+```
+##                 h0730    h0806    h0813    s0806    s0813    s0820
+## denovo208223 2.482827 2.512854 2.353513 2.694865 2.452865 2.757538
+```
+
+```r
+firstdata["denovo976096",1:6]/top_normal["denovo976096",7:12]
+```
+
+```
+##                h0730    h0806    h0813    s0806    s0813    s0820
+## denovo976096 2.47016 2.509546 2.365137 2.697058 2.459181 2.730176
+```
+
+```r
+# have tried different rows. the ratio is always around 2.5. Except a few otus was absent in one of these two datas.
+```
+plot firstdata with ggplot
+
+```r
+den_order <- firstdata[,1:6] %>% 
+  vegdist(method = "bray") %>% 
+    hclust(method = "average") %>% 
+      as.dendrogram 
+table <- firstdata %>% add_rownames
+
+table$rowname <- table$rowname[order.dendrogram(den_order)]
+top_melt <- table %>% 
+    select(rowname,h0730,h0806,h0813,s0806,s0813,s0820) %>% 
+      melt
+```
+
+```
+## Using rowname as id variables
+```
+
+```r
+(p <- ggplot(top_melt, aes(variable, rowname)) + geom_tile(aes(fill = log10(value)), colour = "white") + scale_fill_gradient2(low = "green", mid = "yellow", high = "red", midpoint = 3) + theme(axis.text.y = element_text(size = 1), axis.text.x = element_text(size = 4)) + coord_fixed(ratio=0.15))
+```
+
+```
+## Warning: Non Lab interpolation is deprecated
+```
+
+![](top_100_heatmap_and_indicative_species_analyze_files/figure-html/unnamed-chunk-9-1.png) 
+I found it is also different from first result. I found the row names were changed but the value doesn't changed.
+that because this commond: **`table$rowname <- table$rowname[order.dendrogram(den_order)]`**
+please check for below, you will know why!
+`table1 <- firstdata %>% add_rownames`
+`table2 <- firstdata %>% add_rownames`
+`table1$rowname <- table$rowname[63:1]`
+`table2$rowname <- table$rowname[1:63]`
+then I just true `with()` method to reorder rows, but still different from first result
+
+```r
+table <- firstdata %>% add_rownames
+table$den_order <- order.dendrogram(den_order)
+table$rowname <- with(table, reorder(rowname,den_order))
+top_melt <- table %>% 
+    select(rowname,h0730,h0806,h0813,s0806,s0813,s0820) %>% 
+      melt
+```
+
+```
+## Using rowname as id variables
+```
+
+```r
+(p <- ggplot(top_melt, aes(variable, rowname)) + geom_tile(aes(fill = log10(value)), colour = "white") + scale_fill_gradient2(low = "green", mid = "yellow", high = "red", midpoint = 3) + theme(axis.text.y = element_text(size = 1), axis.text.x = element_text(size = 4)) + coord_fixed(ratio=0.15))
+```
+
+```
+## Warning: Non Lab interpolation is deprecated
+```
+
+![](top_100_heatmap_and_indicative_species_analyze_files/figure-html/unnamed-chunk-10-1.png) 
+## Plot with `Heatplus`
+
+```r
+library(Heatplus)
+library(RColorBrewer)
+scalegreenred <- colorRampPalette(c("green", "red"), space = "rgb")(100)
+heatmap(as.matrix(firstdata[,1:6]), Rowv = den_order, Colv = NA, col = scalegreenred, cexRow = 0.6) 
+```
+
+![](top_100_heatmap_and_indicative_species_analyze_files/figure-html/unnamed-chunk-11-1.png) 
+YES! it works! then plot with other subset data
+## pickout high abundant otus (>=500) from os10 and os11
+
+```r
+den_order <- top_normal[,7:12] %>% 
+  vegdist(method = "bray") %>% 
+    hclust(method = "average") %>% 
+      as.dendrogram 
+heatmap(as.matrix(top_normal), Rowv = den_order, Colv = NA, col = scalegreenred, cexRow = 0.6) 
+```
+
+![](top_100_heatmap_and_indicative_species_analyze_files/figure-html/unnamed-chunk-12-1.png) 
 
 
