@@ -193,7 +193,8 @@ top_melt <- table %>%
       melt
 (p <- ggplot(top_melt, aes(variable, rowname)) + geom_tile(aes(fill = log10(value)), colour = "white") + scale_fill_gradient2(low = "green", mid = "yellow", high = "red", midpoint = 3) + theme(axis.text.y = element_text(size = 1), axis.text.x = element_text(size = 4)) + coord_fixed(ratio=0.15))
 ```
-## Plot with `Heatplus`
+Though otus and their value has been reordered, but the output of heatmap is still different from the first analysis. This maybe because `with()` and `reorder()` method is not suit for dendrogram heatmap plot. I still should learn from template heatmap to plot a dendrogram heatmap!
+## So Plot with `Heatplus`
 ```{r}
 library(Heatplus)
 library(RColorBrewer)
@@ -201,7 +202,7 @@ scalegreenred <- colorRampPalette(c("green", "red"), space = "rgb")(100)
 heatmap(as.matrix(firstdata[,1:6]), Rowv = den_order, Colv = NA, col = scalegreenred, cexRow = 0.6) 
 ```
 YES! it works! then plot with other subset data
-## pickout high abundant otus (>=500) from os10 and os11
+### pickout high abundant otus (>=500) from os10 and os11
 ```{r}
 den_order <- top_normal[,7:12] %>% 
   vegdist(method = "bray") %>% 
@@ -209,5 +210,46 @@ den_order <- top_normal[,7:12] %>%
       as.dendrogram 
 heatmap(as.matrix(top_normal), Rowv = den_order, Colv = NA, col = scalegreenred, cexRow = 0.6) 
 ```
+## find indicative species based on mortality data
+```{r}
+library(indicspecies)
+data(wetland)
+# transform mydata based on wetland data
+tr_data <- top_normal %>% t %>% data.frame
+# check transformed data
+tr_data[,"denovo1017076"]
+top_normal["denovo1017076",]
+# 设定2种可能的分类标准，根据mortality data
+classF1 <- c("a","a","a","d","a","a","a","a","a","b","d","a")
+classF2 <- c("a","a","a","d","b","a","a","a","a","b","d","a")
+# run from classF1 to classF6
+indval = multipatt(tr_data, classF1, control = how(nperm=999))
+summary(indval)
+indval = multipatt(tr_data, classF2, control = how(nperm=999))
+summary(indval)
+```
+only denovo705886 has significancy with group b+d. It's: denovo705886	3.145617504	0	4.413126107	11.91115449	0	0	10.5581394	14.72814299	0	**577.5020538**	12.52276834	3.366478779	o-Rickettsiales; f-mitochondria
+## find indicative species based on 960 otus data
+```{r}
+firstall <- read.csv("otu_table_os_200otu_NormAndRanked.csv", header=TRUE,row.names=1, sep=",")
+tr_data <- firstall[,1:12] %>% t %>% data.frame
+indval = multipatt(tr_data, classF1, control = how(nperm=999))
+summary(indval)
+indval = multipatt(tr_data, classF2, control = how(nperm=999))
+summary(indval)
+```
+For classF1: Group b+d  #sps.  14 
+               stat p.value    
+denovo274616  0.998   0.001 ***
+denovo705886  0.997   0.004 ** 
+denovo1038783 0.993   0.008 ** 
+denovo1503755 0.971   0.006 ** 
 
+For classF2: Group b+d  #sps.  10 
+               stat p.value   
+denovo1699894 0.995   0.004 **
+denovo656814  0.994   0.002 **
+denovo230815  0.992   0.008 **
+denovo1205230 0.991   0.006 **
+denovo314706  0.980   0.003 **
 

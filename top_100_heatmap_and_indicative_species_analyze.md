@@ -527,7 +527,8 @@ top_melt <- table %>%
 ```
 
 ![](top_100_heatmap_and_indicative_species_analyze_files/figure-html/unnamed-chunk-10-1.png) 
-## Plot with `Heatplus`
+Though otus and their value has been reordered, but the output of heatmap is still different from the first analysis. This maybe because `with()` and `reorder()` method is not suit for dendrogram heatmap plot. I still should learn from template heatmap to plot a dendrogram heatmap!
+## So Plot with `Heatplus`
 
 ```r
 library(Heatplus)
@@ -538,7 +539,7 @@ heatmap(as.matrix(firstdata[,1:6]), Rowv = den_order, Colv = NA, col = scalegree
 
 ![](top_100_heatmap_and_indicative_species_analyze_files/figure-html/unnamed-chunk-11-1.png) 
 YES! it works! then plot with other subset data
-## pickout high abundant otus (>=500) from os10 and os11
+### pickout high abundant otus (>=500) from os10 and os11
 
 ```r
 den_order <- top_normal[,7:12] %>% 
@@ -549,5 +550,212 @@ heatmap(as.matrix(top_normal), Rowv = den_order, Colv = NA, col = scalegreenred,
 ```
 
 ![](top_100_heatmap_and_indicative_species_analyze_files/figure-html/unnamed-chunk-12-1.png) 
+## find indicative species based on mortality data
 
+```r
+library(indicspecies)
+data(wetland)
+# transform mydata based on wetland data
+tr_data <- top_normal %>% t %>% data.frame
+# check transformed data
+tr_data[,"denovo1017076"]
+```
+
+```
+##  [1]  294.42980  524.00000   88.26252  251.45771  218.18856  209.78120
+##  [7]  187.56224  200.05728  201.69316   55.86891  423.89571 1691.09451
+```
+
+```r
+top_normal["denovo1017076",]
+```
+
+```
+##                    os1 os2      os3      os4      os5      os6      os7
+## denovo1017076 294.4298 524 88.26252 251.4577 218.1886 209.7812 187.5622
+##                    os8      os9   os10.x   os11.x     os12
+## denovo1017076 200.0573 201.6932 55.86891 423.8957 1691.095
+```
+
+```r
+# 设定2种可能的分类标准，根据mortality data
+classF1 <- c("a","a","a","d","a","a","a","a","a","b","d","a")
+classF2 <- c("a","a","a","d","b","a","a","a","a","b","d","a")
+# run from classF1 to classF6
+indval = multipatt(tr_data, classF1, control = how(nperm=999))
+summary(indval)
+```
+
+```
+## 
+##  Multilevel pattern analysis
+##  ---------------------------
+## 
+##  Association function: IndVal.g
+##  Significance level (alpha): 0.05
+## 
+##  Total number of species: 86
+##  Selected number of species: 1 
+##  Number of species associated to 1 group: 0 
+##  Number of species associated to 2 groups: 1 
+## 
+##  List of species associated to each combination: 
+## 
+##  Group b+d  #sps.  1 
+##               stat p.value   
+## denovo705886 0.996   0.006 **
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+```
+
+```r
+indval = multipatt(tr_data, classF2, control = how(nperm=999))
+summary(indval)
+```
+
+```
+## 
+##  Multilevel pattern analysis
+##  ---------------------------
+## 
+##  Association function: IndVal.g
+##  Significance level (alpha): 0.05
+## 
+##  Total number of species: 86
+##  Selected number of species: 0 
+##  Number of species associated to 1 group: 0 
+##  Number of species associated to 2 groups: 0 
+## 
+##  List of species associated to each combination: 
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+```
+only denovo705886 has significancy with group b+d. It's: denovo705886	3.145617504	0	4.413126107	11.91115449	0	0	10.5581394	14.72814299	0	**577.5020538**	12.52276834	3.366478779	o-Rickettsiales; f-mitochondria
+## find indicative species based on 960 otus data
+
+```r
+firstall <- read.csv("otu_table_os_200otu_NormAndRanked.csv", header=TRUE,row.names=1, sep=",")
+tr_data <- firstall[,1:12] %>% t %>% data.frame
+indval = multipatt(tr_data, classF1, control = how(nperm=999))
+summary(indval)
+```
+
+```
+## 
+##  Multilevel pattern analysis
+##  ---------------------------
+## 
+##  Association function: IndVal.g
+##  Significance level (alpha): 0.05
+## 
+##  Total number of species: 960
+##  Selected number of species: 18 
+##  Number of species associated to 1 group: 3 
+##  Number of species associated to 2 groups: 15 
+## 
+##  List of species associated to each combination: 
+## 
+##  Group a  #sps.  3 
+##                stat p.value   
+## denovo201249  1.000   0.004 **
+## denovo995949  0.972   0.034 * 
+## denovo1184876 0.971   0.023 * 
+## 
+##  Group b+d  #sps.  15 
+##                stat p.value   
+## denovo274616  0.998   0.002 **
+## denovo705886  0.997   0.005 **
+## denovo1038783 0.993   0.011 * 
+## denovo1022919 0.993   0.013 * 
+## denovo49469   0.993   0.019 * 
+## denovo230815  0.989   0.024 * 
+## denovo947416  0.979   0.038 * 
+## denovo654595  0.976   0.039 * 
+## denovo1070540 0.973   0.019 * 
+## denovo656814  0.972   0.006 **
+## denovo1717952 0.972   0.047 * 
+## denovo1503755 0.971   0.010 **
+## denovo1512655 0.962   0.034 * 
+## denovo67708   0.960   0.048 * 
+## denovo314706  0.944   0.026 * 
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+```
+
+```r
+indval = multipatt(tr_data, classF2, control = how(nperm=999))
+summary(indval)
+```
+
+```
+## 
+##  Multilevel pattern analysis
+##  ---------------------------
+## 
+##  Association function: IndVal.g
+##  Significance level (alpha): 0.05
+## 
+##  Total number of species: 960
+##  Selected number of species: 28 
+##  Number of species associated to 1 group: 4 
+##  Number of species associated to 2 groups: 24 
+## 
+##  List of species associated to each combination: 
+## 
+##  Group a  #sps.  4 
+##                stat p.value   
+## denovo482943  0.979   0.002 **
+## denovo1184876 0.956   0.050 * 
+## denovo1124197 0.930   0.045 * 
+## denovo1313525 0.930   0.047 * 
+## 
+##  Group a+b  #sps.  1 
+##               stat p.value  
+## denovo351245 0.995   0.015 *
+## 
+##  Group a+d  #sps.  10 
+##                stat p.value  
+## denovo1569122 1.000   0.026 *
+## denovo449785  1.000   0.026 *
+## denovo713681  0.999   0.042 *
+## denovo196566  0.998   0.028 *
+## denovo265127  0.998   0.026 *
+## denovo188365  0.996   0.020 *
+## denovo1096322 0.996   0.026 *
+## denovo1161608 0.994   0.021 *
+## denovo410821  0.976   0.037 *
+## denovo900707  0.967   0.048 *
+## 
+##  Group b+d  #sps.  13 
+##                stat p.value   
+## denovo1699894 0.995   0.004 **
+## denovo656814  0.994   0.002 **
+## denovo230815  0.992   0.003 **
+## denovo1205230 0.991   0.007 **
+## denovo1022919 0.987   0.021 * 
+## denovo69297   0.986   0.039 * 
+## denovo314706  0.980   0.005 **
+## denovo1043235 0.979   0.041 * 
+## denovo833995  0.977   0.045 * 
+## denovo947416  0.961   0.045 * 
+## denovo1512655 0.957   0.035 * 
+## denovo702032  0.935   0.031 * 
+## denovo641162  0.935   0.035 * 
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+```
+For classF1: Group b+d  #sps.  14 
+               stat p.value    
+denovo274616  0.998   0.001 ***
+denovo705886  0.997   0.004 ** 
+denovo1038783 0.993   0.008 ** 
+denovo1503755 0.971   0.006 ** 
+
+For classF2: Group b+d  #sps.  10 
+               stat p.value   
+denovo1699894 0.995   0.004 **
+denovo656814  0.994   0.002 **
+denovo230815  0.992   0.008 **
+denovo1205230 0.991   0.006 **
+denovo314706  0.980   0.003 **
 
